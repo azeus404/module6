@@ -1,6 +1,5 @@
 import argparse
 import tldextract
-import ipaddress
 
 """
 Extract domains (LLD) dataset
