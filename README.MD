@@ -12,3 +12,11 @@ We used a dataset RAW_DATA/dnsfields_raw.csv and preprocessed it to lld_labeled.
 
 ## Compare distribution of entropy
 We can compare the distribution of entropy for normal vs Malicious domains via histograms and parametric statistics.
+
+##Validation datasets
+
+no Malicious
+https://blog.majestic.com/development/majestic-million-csv-daily/
+
+Malicious
+https://isc.sans.edu/feeds/suspiciousdomains_High.txt
