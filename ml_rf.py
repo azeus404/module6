@@ -15,10 +15,6 @@ from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.dummy import DummyClassifier
 from sklearn.ensemble import RandomForestClassifier
 
-#graph
-from pydot import graph_from_dot_data
-from sklearn.tree import export_graphviz
-from sklearn.externals.six import StringIO
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
@@ -50,7 +46,7 @@ df['length'] = [len(x) for x in df['lld']]
 
 
 """
-#Pearson Spearman correlation
+Pearson Spearman correlation
 Is there a correlation/linear correlation between domain name length and entropy?
 """
 sns.set_context(rc={"figure.figsize": (7, 5)})
@@ -103,44 +99,41 @@ if not dfDGA.empty:
     shadedHist(dfDGA,'entropy',3)
     plt.show()
 
+""""
+Add features
+Dummy classifier
+RandomForestClassifier
+
 """
-Simple decison tree
-https://stackabuse.com/decision-trees-in-python-with-scikit-learn/
-"""
-from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+cv = CountVectorizer(analyzer='char', ngram_range=(3,4))
 
-X = df.drop(['label','lld'], axis=1)
-y = df['label']
-print(df.head(10))
-print(df.describe())
+cv_nominal = cv.fit_transform(df[df['label']== 0]['lld'])
+cv_all     = cv.fit_transform(df['lld'])
 
-# Training set size is 20%
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
+feature_names = cv.get_feature_names()
 
-from sklearn.tree import DecisionTreeClassifier
-classifier = DecisionTreeClassifier()
-classifier.fit(X_train, y_train)
-y_pred = classifier.predict(X_test)
+sorted(cv.vocabulary_.items(), key=operator.itemgetter(1), reverse= True)[0:5]
+dfConcat = pd.concat([df.ix[:, 2:4], pd.DataFrame(cv_all.toarray())], join='outer', axis=1, ignore_index=False)
 
+X = dfConcat.values
+y = df.ix[:,1]
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=22)
+
+from sklearn.ensemble import RandomForestClassifier
+rf = RandomForestClassifier(n_jobs = -1)
+rf.fit(X_train, y_train)
+print('RF' + ': ' + str(rf.score(X_test, y_test)))
 
 """
 Performance
+
 """
 from sklearn.metrics import classification_report, confusion_matrix
 print(confusion_matrix(y_test, y_pred))
 print(classification_report(y_test, y_pred))
-
-
-"""
-Visualisation Desicion tree
-"""
-import pydotplus
-dot_data = StringIO()
-export_graphviz(classifier, out_file=dot_data,
-                filled=True, rounded=True,
-                special_characters=True)
-graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
-graph.write_png('tree.png')
 
 # Export to csv
 #df.to_csv(out,index=False)
