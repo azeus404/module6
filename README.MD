@@ -1,7 +1,7 @@
 
 # Paper MSCE 2019
 
-Using Machine learning for detection of data exfiltration using DNS protocol over a covert channel
+Applying Machine learning for detection of data exfiltration using DNS protocol.
 Used name conventions: LLD = Lower level domain)
 
 # Related work
@@ -9,11 +9,11 @@ https://kldavenport.com/detecting-randomly-generated-domains/
 
 # Setup & run script
 Install the requirements
-Run python ml.py
+Run python ml.py lld_labeled.csv a
 exports a CSV: lld_features_added.csv
 
 # Features
-we used domain entropy and string length
+we used domain name entropy and domain name string length
 
 ## Compare distribution of entropy
 We can compare the distribution of entropy for normal vs Malicious domains via histograms and parametric statistics.
