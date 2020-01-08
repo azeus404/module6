@@ -2,6 +2,9 @@
 # Paper MSCE 2019
 
 Applying Machine learning for detection of data exfiltration using DNS protocol.
+
+This method uses lexical features of DNS names to predict if a domain query is benign or malicious.
+
 Used name conventions: LLD = Lower level domain)
 
 # Related work

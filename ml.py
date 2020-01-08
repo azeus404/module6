@@ -9,6 +9,7 @@ from warnings import filterwarnings
 filterwarnings('ignore')
 
 import argparse
+import tldextract
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split,cross_val_score
@@ -36,7 +37,6 @@ df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
-
 """
 Shannon Entropy calulation
 """
@@ -48,9 +48,28 @@ df['entropy'] = [calcEntropy(x) for x in df['lld']]
 df['length'] = [len(x) for x in df['lld']]
 
 
+"""
+ Number of different characters
 
 """
-#Pearson Spearman correlation
+def countChar(x):
+    charsum = 0
+    total = len(x)
+    for char in x:
+        if not char.isalpha():
+            charsum = charsum + 1
+    return float(charsum)/total
+df['numbchars'] = [countChar(x) for x in df['lld']]
+
+"""
+Dataset
+"""
+data_total = df.shape[0]
+print('Total domains %d' % data_total)
+
+
+"""
+Pearson Spearman correlation
 Is there a correlation/linear correlation between domain name length and entropy?
 """
 sns.set_context(rc={"figure.figsize": (7, 5)})
@@ -61,10 +80,8 @@ plt.show()
 
 
 """
-Nominal_parametric_upper
+Nominal parametric upper
 """
-
-
 #Regular DNS
 dfNominal = df[df['label']== 0]
 ##DNS exfill
@@ -104,7 +121,7 @@ if not dfDGA.empty:
     plt.show()
 
 """
-Simple decison tree
+Simple Decison Tree
 https://stackabuse.com/decision-trees-in-python-with-scikit-learn/
 """
 from sklearn.model_selection import train_test_split
@@ -132,7 +149,7 @@ print(classification_report(y_test, y_pred))
 
 
 """
-Visualisation Desicion tree
+Visualisation Decision tree
 """
 import pydotplus
 dot_data = StringIO()
