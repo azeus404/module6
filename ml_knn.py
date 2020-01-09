@@ -23,11 +23,8 @@ from sklearn.externals.six import StringIO
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
-parser.add_argument('--out', help='export dataset')
-
 args = parser.parse_args()
 path = args.path
-out = args.out
 
 
 """"
@@ -153,12 +150,12 @@ KNN
 """
 from sklearn.neighbors import KNeighborsClassifier
 
-X = df.drop(['label','lld'],axis=1).values
+x = df.drop(['label','lld'],axis=1).values
 y = df['label'].values
 
 #create a test set of size of about 40% of the dataset
 
-X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.4,random_state=42, stratify=y)
+X_train,X_test,y_train,y_test = train_test_split(x,y,test_size=0.4,random_state=42, stratify=y)
 neighbors = np.arange(1,9)
 train_accuracy =np.empty(len(neighbors))
 test_accuracy = np.empty(len(neighbors))
@@ -228,12 +225,18 @@ from sklearn.model_selection import GridSearchCV
 param_grid = {'n_neighbors':np.arange(1,50)}
 knn = KNeighborsClassifier()
 knn_cv= GridSearchCV(knn,param_grid,cv=5)
-knn_cv.fit(X,y)
+knn_cv.fit(x,y)
 print(knn_cv.best_score_)
 print(knn_cv.best_params_)
+
+
 """
-Export dataset to csv
+Cross validation k-fold
 """
-if args.out:
-    # Export to csv
-    df.to_csv(out,index=False)
+from sklearn.model_selection import KFold
+
+kfold = KFold(n_splits=10, random_state=100)
+model_kfold = KNeighborsClassifier()
+results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
+
+print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))

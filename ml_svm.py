@@ -17,11 +17,9 @@ from sklearn.ensemble import RandomForestClassifier
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
-parser.add_argument('--out', help='export dataset')
 
 args = parser.parse_args()
 path = args.path
-out = args.out
 
 
 """"
@@ -106,11 +104,9 @@ from sklearn.svm import SVC
 
 svm = SVC(random_state = 1,gamma='auto' )
 
-
-from sklearn.model_selection import train_test_split
-X = df.drop(['label','lld'],axis=1).values
-Y = df['label'].values
-x_train,x_test,y_train,y_test = train_test_split(X,Y,test_size=0.2,random_state=1)
+x = df.drop(['label','lld'],axis=1).values
+y = df['label'].values
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=1)
 
 svm.fit(x_train,y_train)
 
@@ -143,13 +139,12 @@ print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
 
 
 """
-Cross validation
+Cross validation k-fold
 """
+from sklearn.model_selection import KFold
 
+kfold = KFold(n_splits=10, random_state=100)
+model_kfold = SVC()
+results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
 
-"""
-Export dataset to csv
-"""
-if args.out:
-    # Export to csv
-    df.to_csv(out,index=False)
+print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))

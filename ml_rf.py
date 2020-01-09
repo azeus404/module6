@@ -17,11 +17,10 @@ from sklearn.ensemble import RandomForestClassifier
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
-parser.add_argument('--out', help='export dataset')
 
 args = parser.parse_args()
 path = args.path
-out = args.out
+
 
 
 """"
@@ -100,15 +99,13 @@ if not dfDGA.empty:
 
 """
 Random forrest
-
 """
-from sklearn.ensemble import RandomForestClassifier
 
-X = df.drop(['label','lld'],axis=1).values
-Y = df['label'].values
 
-from sklearn.model_selection import train_test_split
-x_train,x_test,y_train,y_test = train_test_split(X,Y,test_size=0.2,random_state=1)
+x = df.drop(['label','lld'],axis=1).values
+y = df['label'].values
+
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=1)
 
 rt=RandomForestClassifier(n_estimators=35,random_state=1)
 rt.fit(x_train,y_train)
@@ -124,7 +121,7 @@ for i in range(1,50):
 plt.figure(figsize=(12,8))
 plt.plot(range(1,50),score_list2)
 plt.xlabel("Esimator values")
-plt.ylabel("Acuuracy")
+plt.ylabel("Acuracy")
 plt.show()
 
 """
@@ -138,14 +135,14 @@ y_true = y_test
 
 print(confusion_matrix(y_true, y_pred))
 print(classification_report(y_true, y_pred))
-"""
-Cross validation
-"""
-
 
 """
-Export dataset to csv
+Cross validation k-fold
 """
-if args.out:
-    # Export to csv
-    df.to_csv(out,index=False)
+from sklearn.model_selection import KFold
+
+kfold = KFold(n_splits=10, random_state=100)
+model_kfold = RandomForestClassifier()
+results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
+
+print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))

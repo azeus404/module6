@@ -192,12 +192,12 @@ plt.show()
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
 
 """
-Cross validation
+Cross validation k-fold
 """
+from sklearn.model_selection import KFold
 
-"""
-Export dataset to csv
-"""
-if args.out:
-    # Export to csv
-    df.to_csv(out,index=False)
+kfold = KFold(n_splits=10, random_state=100)
+model_kfold = LogisticRegression()
+results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
+
+print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))

@@ -10,7 +10,6 @@ filterwarnings('ignore')
 
 import pydotplus
 import argparse
-import tldextract
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split,cross_val_score
@@ -23,12 +22,10 @@ from sklearn.externals.six import StringIO
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
-parser.add_argument('--out', help='export dataset')
 parser.add_argument('--print', help='print Decision Tree')
 
 args = parser.parse_args()
 path = args.path
-out = args.out
 print = args.print
 
 
@@ -38,17 +35,6 @@ Pre-process data: drop duplicates and empty
 df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
-
-"""
-Data visualisation
-"""
-labels=df["label"].value_counts().index
-sizes=df["label"].value_counts().values
-plt.figure(figsize=(11,11))
-plt.pie(sizes,labels=("Malicious","Benign"),autopct="%1.f%%")
-plt.title("Value counts of class",size=25)
-plt.legend()
-plt.show()
 
 """
 Shannon Entropy calulation
@@ -76,14 +62,13 @@ def countChar(x):
         if not char.isalpha():
             charsum = charsum + 1
     return float(charsum)/total
-#df['numbchars'] = [countChar(x) for x in df['lld']]
+df['numbchars'] = [countChar(x) for x in df['lld']]
 
 """
 Properties of the dataset
 """
-data_total = df.shape
-print('%d %d' % (data_total[0], data_total[1]))
-print('Total domains %d' % data_total[0])
+#print('%d %d' % (df.shape[0], df.shape[1]))
+#print('Total domains %d' % df.shape[0])
 
 """
 Pearson Spearman correlation
@@ -179,10 +164,21 @@ plt.plot([0,1],[0,1],'k--')
 plt.plot(fpr,tpr, label='Knn')
 plt.xlabel('fpr')
 plt.ylabel('tpr')
-plt.title('Knn(n_neighbors=7) ROC curve')
+plt.title('Decision Tree ROC curve')
 plt.show()
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
 
+
+"""
+Cross validation k-fold
+"""
+from sklearn.model_selection import KFold
+
+kfold = KFold(n_splits=10, random_state=100)
+model_kfold = DecisionTreeClassifier()
+results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
+
+print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))
 
 """
 Visualisation Decision tree
@@ -195,9 +191,3 @@ if args.print:
                     special_characters=True)
     graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
     graph.write_png('tree.png')
-"""
-Export dataset to csv
-"""
-if args.ou:
-    # Export to csv
-    df.to_csv(out,index=False)

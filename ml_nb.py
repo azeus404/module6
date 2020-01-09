@@ -22,12 +22,9 @@ from sklearn.externals.six import StringIO
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
-parser.add_argument('--out', help='export dataset')
 
 args = parser.parse_args()
 path = args.path
-out = args.out
-
 
 """"
 Pre-process data: drop duplicates
@@ -152,11 +149,11 @@ Naive Bayes
 """
 from sklearn.naive_bayes import GaussianNB
 
-X = df.drop(['label','lld'],axis=1).values
-Y = df['label'].values
+x = df.drop(['label','lld'],axis=1).values
+y = df['label'].values
 
 #create a test set of size of about 20% of the dataset
-x_train,x_test,y_train,y_test = train_test_split(X,Y,test_size=0.2,random_state=1)
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=1)
 
 nb = GaussianNB()
 nb.fit(x_train,y_train)
@@ -193,12 +190,12 @@ plt.show()
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
 
 """
-Cross validation
+Cross validation k-fold
 """
+from sklearn.model_selection import KFold
 
-"""
-Export dataset to csv
-"""
-if args.out:
-    # Export to csv
-    df.to_csv(out,index=False)
+kfold = KFold(n_splits=10, random_state=100)
+model_kfold = GaussianNB()
+results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
+
+print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))
