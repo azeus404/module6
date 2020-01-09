@@ -1,14 +1,23 @@
 import pandas as pd
-from pandas.plotting import scatter_matrix
 import operator
 import numpy as np
 import seaborn as sns
 from scipy import stats
 import matplotlib.pyplot as plt
 from collections import Counter
+from warnings import filterwarnings
+filterwarnings('ignore')
 
 import argparse
-import tldextract
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split,cross_val_score
+
+
+#graph
+from pydot import graph_from_dot_data
+from sklearn.tree import export_graphviz
+from sklearn.externals.six import StringIO
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
@@ -25,6 +34,17 @@ Pre-process data: drop duplicates
 df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
+
+"""
+Data visualisation
+"""
+labels=df["label"].value_counts().index
+sizes=df["label"].value_counts().values
+plt.figure(figsize=(11,11))
+plt.pie(sizes,labels=("Benign","Malicious"),autopct="%1.f%%")
+plt.title("Value counts of class",size=25)
+plt.legend()
+#plt.show()
 
 """
 Shannon Entropy calulation
@@ -51,12 +71,11 @@ def countChar(x):
 df['numbchars'] = [countChar(x) for x in df['lld']]
 
 """
-Metric and statistics of the dataset
+Properties of the dataset
 """
 data_total = df.shape
 print('%d %d' % (data_total[0], data_total[1]))
-
-print(df.describe().transpose())
+print('Total domains %d' % data_total[0])
 
 """
 Pearson Spearman correlation
@@ -108,36 +127,11 @@ if not dfDGA.empty:
     """
     sns.set_context(rc={"figure.figsize": (7, 5)})
     shadedHist(dfDGA,'entropy',3)
-    plt.show()
-
-
-"""
-Box plots
-"""
-
-df.plot(kind='box', subplots=True, layout=(2,2), sharex=False, sharey=False)
-plt.show()
-
-"""
- Group by Class
-"""
-print(df.groupby('label').size())
-
-"""
-    histograms
-"""
-df.hist()
-plt.show()
+    #plt.show()
 
 
 """
 
-"""
-
-scatter_matrix(df)
-plt.show()
-
-"""
 Entropy compared scatter plot
 Below you can see that our DGA domains do tend to have higher entropy than benign domains on average.
 
@@ -151,6 +145,58 @@ pylab.xlabel('Domain Length')
 pylab.ylabel('Domain Entropy')
 plt.show()
 """
+
+"""
+Neural network
+"""
+from sklearn.neural_network import MLPClassifier
+
+mlp = MLPClassifier(hidden_layer_sizes=(8,8,8), activation='relu', solver='adam', max_iter=500)
+
+
+X = df.drop(['label','lld'],axis=1).values
+Y = df['label'].values
+
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.20, random_state=40)
+mlp.fit(x_train,y_train)
+predict_train = mlp.predict(x_train)
+predict_test = mlp.predict(x_test)
+
+print("Accuracy score: ",mlp.score(x_test,y_test))
+
+"""
+Performance
+- Confusion matrix
+- Classification report
+- ROC
+"""
+from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score
+
+y_pred = mlp.predict(x_test)
+y_true = y_test
+
+#Confusion matrix
+print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
+
+#Classifucation report
+print(classification_report(y_test, y_pred))
+
+#ROC
+y_pred_proba = mlp.predict_proba(x_test)[:,1]
+fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
+
+plt.plot([0,1],[0,1],'k--')
+plt.plot(fpr,tpr, label='Knn')
+plt.xlabel('fpr')
+plt.ylabel('tpr')
+plt.title('Neural network ROC curve')
+plt.show()
+print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
+
+"""
+Cross validation
+"""
+
 """
 Export dataset to csv
 """

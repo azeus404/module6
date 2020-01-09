@@ -6,13 +6,14 @@ Applying Machine learning for detection of data exfiltration using DNS protocol.
 This method uses lexical features of DNS names to predict if a domain query is benign or malicious.
 
 Used name conventions: LLD = Lower level domain)
-#Classifiaction models
-- K Nearest Neighborhood (KNN)
+# classification models
+- K-Nearest Neighbor (KNN)
 - Logistic Regression
 - Support Vector Machine (SVM)
 - Naive Bayes
 - Decision Tree
 - Random Forrest
+- Neural network
 
 # Related work
 https://kldavenport.com/detecting-randomly-generated-domains/
