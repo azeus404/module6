@@ -8,13 +8,13 @@ from collections import Counter
 from warnings import filterwarnings
 filterwarnings('ignore')
 
+import pydotplus
 import argparse
 import tldextract
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.dummy import DummyClassifier
-from sklearn.ensemble import RandomForestClassifier
 
 #graph
 from pydot import graph_from_dot_data
@@ -23,19 +23,32 @@ from sklearn.externals.six import StringIO
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
-parser.add_argument('out', help='lldlist')
+parser.add_argument('--out', help='export dataset')
+parser.add_argument('--print', help='print Decision Tree')
 
 args = parser.parse_args()
 path = args.path
 out = args.out
+print = args.print
 
 
 """"
-Pre-process data: drop duplicates
+Pre-process data: drop duplicates and empty
 """
 df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
+
+"""
+Data visualisation
+"""
+labels=df["label"].value_counts().index
+sizes=df["label"].value_counts().values
+plt.figure(figsize=(11,11))
+plt.pie(sizes,labels=("Malicious","Benign"),autopct="%1.f%%")
+plt.title("Value counts of class",size=25)
+plt.legend()
+plt.show()
 
 """
 Shannon Entropy calulation
@@ -45,6 +58,10 @@ def calcEntropy(x):
     return -np.sum( count/lens * np.log2(count/lens) for count in p.values())
 
 df['entropy'] = [calcEntropy(x) for x in df['lld']]
+
+"""
+LLD record lenght
+"""
 df['length'] = [len(x) for x in df['lld']]
 
 
@@ -59,14 +76,14 @@ def countChar(x):
         if not char.isalpha():
             charsum = charsum + 1
     return float(charsum)/total
-df['numbchars'] = [countChar(x) for x in df['lld']]
+#df['numbchars'] = [countChar(x) for x in df['lld']]
 
 """
-Dataset
+Properties of the dataset
 """
-data_total = df.shape[0]
-print('Total domains %d' % data_total)
-
+data_total = df.shape
+print('%d %d' % (data_total[0], data_total[1]))
+print('Total domains %d' % data_total[0])
 
 """
 Pearson Spearman correlation
@@ -122,58 +139,65 @@ if not dfDGA.empty:
 
 
 """
-
-Entropy compared scatter plot
-Below you can see that our DGA domains do tend to have higher entropy than benign domains on average.
-
-"""
-malicious = df['label'] == 1
-benign = df['label'] == 0
-plt.scatter(benign['length'],benign['entropy'], s=140, c='#aaaaff', label='Benign', alpha=.2)
-plt.scatter(malicious['length'], malicious['entropy'], s=40, c='r', label='Malicious', alpha=.3)
-plt.legend()
-pylab.xlabel('Domain Length')
-pylab.ylabel('Domain Entropy')
-plt.show()
-
-"""
 Simple Decison Tree
-https://stackabuse.com/decision-trees-in-python-with-scikit-learn/
 """
-from sklearn.model_selection import train_test_split
 
+from sklearn.tree import DecisionTreeClassifier
+
+dt=DecisionTreeClassifier()
+dt.fit(x_train,y_train)
 X = df.drop(['label','lld'], axis=1)
 y = df['label']
-print(df.head(10))
-print(df.describe())
 
 # Training set size is 20%
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
 
-from sklearn.tree import DecisionTreeClassifier
-classifier = DecisionTreeClassifier()
-classifier.fit(X_train, y_train)
-y_pred = classifier.predict(X_test)
+print("Accuracy score: ",dt.score(x_test,y_test))
 
 
 """
 Performance
+- Confusion matrix
+- Classification report
+- ROC
 """
-from sklearn.metrics import classification_report, confusion_matrix
-print(confusion_matrix(y_test, y_pred))
+from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score
+
+y_pred = dt.predict(x_test)
+y_true = y_test
+
+#Confusion matrix
+print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
+
+#Classifucation report
 print(classification_report(y_test, y_pred))
+
+y_pred_proba = classifier.predict_proba(X_test)[:,1]
+fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
+
+plt.plot([0,1],[0,1],'k--')
+plt.plot(fpr,tpr, label='Knn')
+plt.xlabel('fpr')
+plt.ylabel('tpr')
+plt.title('Knn(n_neighbors=7) ROC curve')
+plt.show()
+print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
 
 
 """
 Visualisation Decision tree
 """
-import pydotplus
-dot_data = StringIO()
-export_graphviz(classifier, out_file=dot_data,
-                filled=True, rounded=True,
-                special_characters=True)
-graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
-graph.write_png('tree.png')
 
-# Export to csv
-#df.to_csv(out,index=False)
+if args.print:
+    dot_data = StringIO()
+    export_graphviz(classifier, out_file=dot_data,
+                    filled=True, rounded=True,
+                    special_characters=True)
+    graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+    graph.write_png('tree.png')
+"""
+Export dataset to csv
+"""
+if args.ou:
+    # Export to csv
+    df.to_csv(out,index=False)

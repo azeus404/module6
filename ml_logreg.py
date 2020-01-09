@@ -9,11 +9,15 @@ from warnings import filterwarnings
 filterwarnings('ignore')
 
 import argparse
+import tldextract
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split,cross_val_score
-from sklearn.ensemble import RandomForestClassifier
 
+#graph
+from pydot import graph_from_dot_data
+from sklearn.tree import export_graphviz
+from sklearn.externals.six import StringIO
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
@@ -31,6 +35,16 @@ df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
+"""
+Data visualisation
+"""
+labels=df["label"].value_counts().index
+sizes=df["label"].value_counts().values
+plt.figure(figsize=(11,11))
+plt.pie(sizes,labels=("Benign","Malicious"),autopct="%1.f%%")
+plt.title("Value counts of class",size=25)
+plt.legend()
+plt.show()
 
 """
 Shannon Entropy calulation
@@ -43,6 +57,25 @@ df['entropy'] = [calcEntropy(x) for x in df['lld']]
 df['length'] = [len(x) for x in df['lld']]
 
 
+"""
+ Number of different characters
+
+"""
+def countChar(x):
+    charsum = 0
+    total = len(x)
+    for char in x:
+        if not char.isalpha():
+            charsum = charsum + 1
+    return float(charsum)/total
+df['numbchars'] = [countChar(x) for x in df['lld']]
+
+"""
+Properties of the dataset
+"""
+data_total = df.shape
+print('%d %d' % (data_total[0], data_total[1]))
+print('Total domains %d' % data_total[0])
 
 """
 Pearson Spearman correlation
@@ -56,10 +89,8 @@ plt.show()
 
 
 """
-Nominal_parametric_upper
+Nominal parametric upper
 """
-
-
 #Regular DNS
 dfNominal = df[df['label']== 0]
 ##DNS exfill
@@ -98,50 +129,71 @@ if not dfDGA.empty:
     shadedHist(dfDGA,'entropy',3)
     plt.show()
 
-"""
-Random forrest
 
 """
-from sklearn.ensemble import RandomForestClassifier
 
-X = df.drop(['label','lld'],axis=1).values
-Y = df['label'].values
+Entropy compared scatter plot
+Below you can see that our DGA domains do tend to have higher entropy than benign domains on average.
 
-from sklearn.model_selection import train_test_split
-x_train,x_test,y_train,y_test = train_test_split(X,Y,test_size=0.2,random_state=1)
 
-rt=RandomForestClassifier(n_estimators=35,random_state=1)
-rt.fit(x_train,y_train)
-
-print("score: ",rt.score(x_test,y_test))
-
-score_list2=[]
-for i in range(1,50):
-    rt2=RandomForestClassifier(n_estimators=i,random_state=1)
-    rt2.fit(x_train,y_train)
-    score_list2.append(rt2.score(x_test,y_test))
-
-plt.figure(figsize=(12,8))
-plt.plot(range(1,50),score_list2)
-plt.xlabel("Esimator values")
-plt.ylabel("Acuuracy")
+malicious = df['label'] == 1
+benign = df['label'] == 0
+plt.scatter(benign['length'],benign['entropy'], s=140, c='#aaaaff', label='Benign', alpha=.2)
+plt.scatter(malicious['length'], malicious['entropy'], s=40, c='r', label='Malicious', alpha=.3)
+plt.legend()
+pylab.xlabel('Domain Length')
+pylab.ylabel('Domain Entropy')
 plt.show()
+"""
+
+"""
+Logistic Regression
+"""
+from sklearn.linear_model import LogisticRegression
+
+x = df.drop(['label','lld'],axis=1).values
+y = df['label'].values
+
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.4,random_state=42, stratify=y)
+
+lr=LogisticRegression(solver='lbfgs')
+lr.fit(x_train,y_train)
+
+print("Accuracy score: ",lr.score(x_test,y_test))
+
 
 """
 Performance
-
+- Confusion matrix
+- Classification report
+- ROC
 """
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score
 
-y_pred = rt.predict(x_test)
+y_pred = lr.predict(x_test)
 y_true = y_test
 
-print(confusion_matrix(y_true, y_pred))
-print(classification_report(y_true, y_pred))
+#Confusion matrix
+print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
+
+#Classifucation report
+print(classification_report(y_test, y_pred))
+
+#ROC
+y_pred_proba = lr.predict_proba(x_test)[:,1]
+fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
+
+plt.plot([0,1],[0,1],'k--')
+plt.plot(fpr,tpr, label='Knn')
+plt.xlabel('fpr')
+plt.ylabel('tpr')
+plt.title('Logistic Regression ROC curve')
+plt.show()
+print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
+
 """
 Cross validation
 """
-
 
 """
 Export dataset to csv

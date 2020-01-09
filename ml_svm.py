@@ -99,33 +99,22 @@ if not dfDGA.empty:
     plt.show()
 
 """
-Random forrest
+Support vector machine
 
 """
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 
-X = df.drop(['label','lld'],axis=1).values
-Y = df['label'].values
+svm = SVC(random_state = 1,gamma='auto' )
+
 
 from sklearn.model_selection import train_test_split
+X = df.drop(['label','lld'],axis=1).values
+Y = df['label'].values
 x_train,x_test,y_train,y_test = train_test_split(X,Y,test_size=0.2,random_state=1)
 
-rt=RandomForestClassifier(n_estimators=35,random_state=1)
-rt.fit(x_train,y_train)
+svm.fit(x_train,y_train)
 
-print("score: ",rt.score(x_test,y_test))
-
-score_list2=[]
-for i in range(1,50):
-    rt2=RandomForestClassifier(n_estimators=i,random_state=1)
-    rt2.fit(x_train,y_train)
-    score_list2.append(rt2.score(x_test,y_test))
-
-plt.figure(figsize=(12,8))
-plt.plot(range(1,50),score_list2)
-plt.xlabel("Esimator values")
-plt.ylabel("Acuuracy")
-plt.show()
+print("Accuracy score: ",svm.score(x_test,y_test))
 
 """
 Performance
@@ -133,11 +122,26 @@ Performance
 """
 from sklearn.metrics import classification_report, confusion_matrix
 
-y_pred = rt.predict(x_test)
+y_pred = svm.predict(x_test)
 y_true = y_test
 
 print(confusion_matrix(y_true, y_pred))
 print(classification_report(y_true, y_pred))
+
+
+#ROC
+y_pred_proba = svm.predict_proba(x_test)[:,1]
+fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
+
+plt.plot([0,1],[0,1],'k--')
+plt.plot(fpr,tpr, label='svm')
+plt.xlabel('fpr')
+plt.ylabel('tpr')
+plt.title('svm ROC curve')
+plt.show()
+print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
+
+
 """
 Cross validation
 """
