@@ -120,6 +120,22 @@ if not dfDGA.empty:
     shadedHist(dfDGA,'entropy',3)
     plt.show()
 
+
+"""
+
+Entropy compared scatter plot
+Below you can see that our DGA domains do tend to have higher entropy than benign domains on average.
+
+"""
+malicious = df['label'] == 1
+benign = df['label'] == 0
+plt.scatter(benign['length'],benign['entropy'], s=140, c='#aaaaff', label='Benign', alpha=.2)
+plt.scatter(malicious['length'], malicious['entropy'], s=40, c='r', label='Malicious', alpha=.3)
+plt.legend()
+pylab.xlabel('Domain Length')
+pylab.ylabel('Domain Entropy')
+plt.show()
+
 """
 Simple Decison Tree
 https://stackabuse.com/decision-trees-in-python-with-scikit-learn/
