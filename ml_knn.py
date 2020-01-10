@@ -153,9 +153,9 @@ from sklearn.neighbors import KNeighborsClassifier
 x = df.drop(['label','lld'],axis=1).values
 y = df['label'].values
 
-#create a test set of size of about 40% of the dataset
+#create a test set of size of about 20% of the dataset
 
-X_train,X_test,y_train,y_test = train_test_split(x,y,test_size=0.4,random_state=42, stratify=y)
+X_train,X_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42, stratify=y)
 neighbors = np.arange(1,9)
 train_accuracy =np.empty(len(neighbors))
 test_accuracy = np.empty(len(neighbors))
