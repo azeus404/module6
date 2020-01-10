@@ -131,11 +131,11 @@ from sklearn.tree import DecisionTreeClassifier
 
 dt=DecisionTreeClassifier()
 dt.fit(x_train,y_train)
-X = df.drop(['label','lld'], axis=1)
+x = df.drop(['label','lld'], axis=1)
 y = df['label']
 
 # Training set size is 20%
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
+X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.20)
 
 print("Accuracy score: ",dt.score(x_test,y_test))
 

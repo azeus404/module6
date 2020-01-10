@@ -17,15 +17,11 @@ df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
-
-
-
-
-
-
 corpora = df['lld']
+
 cvec = CountVectorizer(lowercase=False, ngram_range=(1,2))
 wm = cvec.fit_transform(corpora)
 tokens = cvec.get_feature_names()
+
 print(tokens)
 #print(wm2df(wm, tokens))
