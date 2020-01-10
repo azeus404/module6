@@ -49,6 +49,7 @@ readme_renderer = "==24.0"
 SimpleWebSocketServer = "==0.1.1"
 websocket_client = "==0.57.0"
 graphviz = "*"
+tabulate = "*"
 
 [requires]
 python_version = "3.7"

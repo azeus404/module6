@@ -11,9 +11,10 @@ filterwarnings('ignore')
 import pydotplus
 import argparse
 
-from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split,cross_val_score
-from sklearn.dummy import DummyClassifier
+from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score
+from sklearn.tree import DecisionTreeClassifier
+
 
 #graph
 from pydot import graph_from_dot_data
@@ -27,7 +28,6 @@ parser.add_argument('--print', help='print Decision Tree')
 args = parser.parse_args()
 path = args.path
 print = args.print
-
 
 """"
 Pre-process data: drop duplicates and empty
@@ -46,7 +46,7 @@ def calcEntropy(x):
 df['entropy'] = [calcEntropy(x) for x in df['lld']]
 
 """
-LLD record lenght
+LLD record length
 """
 df['length'] = [len(x) for x in df['lld']]
 
@@ -64,6 +64,7 @@ def countChar(x):
     return float(charsum)/total
 df['numbchars'] = [countChar(x) for x in df['lld']]
 
+print(df.head)
 """
 Properties of the dataset
 """
@@ -71,71 +72,17 @@ Properties of the dataset
 #print('Total domains %d' % df.shape[0])
 
 """
-Pearson Spearman correlation
-Is there a correlation/linear correlation between domain name length and entropy?
-"""
-sns.set_context(rc={"figure.figsize": (7, 5)})
-g = sns.JointGrid(df.length.astype(float), df.entropy.astype(float))
-g.plot(sns.regplot, sns.distplot, stats.spearmanr);
-print("Pearson's r: {0}".format(stats.pearsonr(df.length.astype(float), df.entropy.astype(float))))
-plt.show()
-
-
-"""
-Nominal parametric upper
-"""
-#Regular DNS
-dfNominal = df[df['label']== 0]
-##DNS exfill
-dfDGA = df[df['label']== 1]
-
-def shadedHist(df,col,bins):
-    df[col].hist(bins = bins, color = 'dodgerblue', alpha = .6, normed = False)
-    len_mean = df[col].mean()
-    len_std = df[col].std()
-
-    # mpl red is 3 standard deviations
-    plt.plot([len_mean, len_mean], [0,2500 ],'k-',lw=3,color = 'black',alpha = .4)
-    plt.plot([len_mean + (2 * len_std), len_mean + (2 * len_std)], [0, 2500], 'k-', lw=2, color = 'red', alpha = .4)
-    plt.axvspan(len_mean + (2 * len_std), max(df[col]), facecolor='r', alpha=0.3)
-    plt.title(col)
-
-"""
-Nominal entropy distribution
-"""
-sns.set_context(rc={"figure.figsize": (7, 5)})
-
-shadedHist(df[df['label']== 0],'entropy',3)
-plt.show()
-
-
-nominal_parametric_upper = dfNominal['entropy'].mean() + \
-      2 * dfNominal['entropy'].std()
-
-print("upper",nominal_parametric_upper)
-
-if not dfDGA.empty:
-    """
-    Malicious entropy distribution
-    """
-    sns.set_context(rc={"figure.figsize": (7, 5)})
-    shadedHist(dfDGA,'entropy',3)
-    plt.show()
-
-
-"""
 Simple Decison Tree
 """
 
-from sklearn.tree import DecisionTreeClassifier
-
 dt=DecisionTreeClassifier()
-dt.fit(x_train,y_train)
+
 x = df.drop(['label','lld'], axis=1)
 y = df['label']
 
 # Training set size is 20%
-X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.20)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42)
+dt.fit(x_train,y_train)
 
 print("Accuracy score: ",dt.score(x_test,y_test))
 
@@ -146,15 +93,13 @@ Performance
 - Classification report
 - ROC
 """
-from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score
-
 y_pred = dt.predict(x_test)
 y_true = y_test
 
-#Confusion matrix
+print("[+]Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
 
-#Classifucation report
+print("[+]classification report")
 print(classification_report(y_test, y_pred))
 
 y_pred_proba = classifier.predict_proba(X_test)[:,1]
