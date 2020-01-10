@@ -133,8 +133,11 @@ from sklearn.metrics import classification_report, confusion_matrix
 y_pred = rt.predict(x_test)
 y_true = y_test
 
-print(confusion_matrix(y_true, y_pred))
-print(classification_report(y_true, y_pred))
+#Confusion matrix
+print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
+
+#Classifucation report
+print(classification_report(y_test, y_pred))
 
 """
 Cross validation k-fold
