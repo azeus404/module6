@@ -99,14 +99,14 @@ print("[+]classification report")
 print(classification_report(y_test, y_pred))
 
 #ROC
-y_pred_proba = knn.predict_proba(X_test)[:,1]
+y_pred_proba = knn.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
 plt.plot([0,1],[0,1],'k--')
 plt.plot(fpr,tpr, label='Knn')
 plt.xlabel('fpr')
 plt.ylabel('tpr')
-plt.title('k-NN(n_neighbors=7) ROC curve')
+plt.title('k-NN(n_neighbors=3) ROC curve')
 plt.show()
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
 

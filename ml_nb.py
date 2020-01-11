@@ -67,6 +67,7 @@ print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], mar
 
 print("[+]classification report")
 print(classification_report(y_test, y_pred))
+print("True positive rate = Recall")
 
 #ROC
 y_pred_proba = nb.predict_proba(x_test)[:,1]

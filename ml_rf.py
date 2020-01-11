@@ -87,6 +87,7 @@ print(".90-1 = excellent (A) .80-.90 = good (B) .70-.80 = fair (C) .60-.70 = poo
 
 """
 Cross validation k-fold
+https://towardsdatascience.com/cross-validation-explained-evaluating-estimator-performance-e51e5430ff85
 """
 print("[+] Cross validation")
 kfold = KFold(n_splits=10, random_state=42)

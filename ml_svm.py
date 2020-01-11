@@ -61,6 +61,7 @@ print(pd.crosstab(y_true, y_pred, rownames=['True'], colnames=['Predicted'], mar
 
 
 print("[+]classification report")
+#https://muthu.co/understanding-the-classification-report-in-sklearn/
 print(classification_report(y_true, y_pred))
 
 

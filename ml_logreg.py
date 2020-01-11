@@ -15,7 +15,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import KFold
-from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score
+from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score,accuracy_score
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
@@ -53,7 +53,7 @@ lr=LogisticRegression(solver='lbfgs')
 lr.fit(x_train,y_train)
 
 print("Accuracy score: ",lr.score(x_test,y_test))
-
+#print(accuracy_score(x_test,y_test))
 
 """
 Performance
