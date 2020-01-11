@@ -50,6 +50,7 @@ SimpleWebSocketServer = "==0.1.1"
 websocket_client = "==0.57.0"
 graphviz = "*"
 tabulate = "*"
+jupyterlab = "*"
 
 [requires]
 python_version = "3.7"

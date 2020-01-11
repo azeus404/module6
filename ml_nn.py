@@ -31,33 +31,6 @@ df.dropna(inplace=True)
 
 
 """
-Shannon Entropy calulation
-"""
-def calcEntropy(x):
-    p, lens = Counter(x), np.float(len(x))
-    return -np.sum( count/lens * np.log2(count/lens) for count in p.values())
-
-df['entropy'] = [calcEntropy(x) for x in df['lld']]
-
-"""
-LLD record length
-"""
-df['length'] = [len(x) for x in df['lld']]
-
-"""
- Number of different characters
-
-"""
-def countChar(x):
-    charsum = 0
-    total = len(x)
-    for char in x:
-        if not char.isalpha():
-            charsum = charsum + 1
-    return float(charsum)/total
-df['numbchars'] = [countChar(x) for x in df['lld']]
-
-"""
 Properties of the dataset
 """
 data_total = df.shape
@@ -76,7 +49,7 @@ x = df.drop(['label','lld'],axis=1).values
 y = df['label'].values
 
 #create a test set of size of about 20% of the dataset
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42, stratify=y)
 mlp.fit(x_train,y_train)
 predict_train = mlp.predict(x_train)
 predict_test = mlp.predict(x_test)
@@ -107,9 +80,11 @@ plt.plot([0,1],[0,1],'k--')
 plt.plot(fpr,tpr, label='Knn')
 plt.xlabel('fpr')
 plt.ylabel('tpr')
-plt.title('Neural network ROC curve')
+plt.title('Neural Network ROC curve')
 plt.show()
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
+#http://gim.unmc.edu/dxtests/ROC3.htm
+print(".90-1 = excellent (A) .80-.90 = good (B) .70-.80 = fair (C) .60-.70 = poor (D) .50-.60 = fail (F)")
 
 
 """

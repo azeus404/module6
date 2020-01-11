@@ -29,35 +29,6 @@ df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
 """
-Shannon Entropy calulation
-"""
-def calcEntropy(x):
-    p, lens = Counter(x), np.float(len(x))
-    return -np.sum( count/lens * np.log2(count/lens) for count in p.values())
-
-df['entropy'] = [calcEntropy(x) for x in df['lld']]
-df['length'] = [len(x) for x in df['lld']]
-
-"""
- Number of different characters
-
-"""
-def countChar(x):
-    charsum = 0
-    total = len(x)
-    for char in x:
-        if not char.isalpha():
-            charsum = charsum + 1
-    return float(charsum)/total
-df['numbchars'] = [countChar(x) for x in df['lld']]
-
-
-"""
-LLD record length
-"""
-df['length'] = [len(x) for x in df['lld']]
-
-"""
 Properties of the dataset
 """
 data_total = df.shape
@@ -76,7 +47,7 @@ y = df['label'].values
 
 #create a test set of size of about 20% of the dataset
 
-X_train,X_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42, stratify=y)
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42, stratify=y)
 neighbors = np.arange(1,9)
 train_accuracy =np.empty(len(neighbors))
 test_accuracy = np.empty(len(neighbors))
@@ -86,13 +57,13 @@ for i,k in enumerate(neighbors):
     knn = KNeighborsClassifier(n_neighbors=k)
 
     #Fit the model
-    knn.fit(X_train, y_train)
+    knn.fit(x_train, y_train)
 
     #Compute accuracy on the training set
-    train_accuracy[i] = knn.score(X_train, y_train)
+    train_accuracy[i] = knn.score(x_train, y_train)
 
     #Compute accuracy on the test set
-    test_accuracy[i] = knn.score(X_test, y_test)
+    test_accuracy[i] = knn.score(x_test, y_test)
 
 
 """
@@ -108,9 +79,9 @@ plt.show()
 
 
 #Setup a knn classifier with k neighbors
-knn = KNeighborsClassifier(n_neighbors=7)
-knn.fit(X_train,y_train)
-knn.score(X_test,y_test)
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(x_train,y_train)
+knn.score(x_test,y_test)
 
 """
 Performance
@@ -119,13 +90,14 @@ Performance
 - ROC
 """
 
-y_pred = knn.predict(X_test)
+y_pred = knn.predict(x_test)
 
 print("[+]Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
 
 print("[+]classification report")
 print(classification_report(y_test, y_pred))
+
 #ROC
 y_pred_proba = knn.predict_proba(X_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)

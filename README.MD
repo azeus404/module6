@@ -20,8 +20,10 @@ https://kldavenport.com/detecting-randomly-generated-domains/
 https://www.kaggle.com/amolbhivarkar/knn-for-classification-using-scikit-learn
 
 # Setup & run script
-Install the requirements
-Run python the different ml_<model>.py to lld_lab_data.csv
+0 - Install the requirements pipenv install -r requirements.txt
+start jupyter notebook
+1 - Run preprocessing script python ml_datapreprocessing.py lld_lab_data.csv --out lld_lab_features_added.csv
+2 - Run the defferent machine learing model scripts different ml_<model>.py lld_lab_features_added.csv
 
 # Features
 we used domain name entropy, domain name string length and ratio of aplha numeric characters vs letters in the domain name
@@ -31,7 +33,6 @@ We can compare the distribution of entropy for normal vs Malicious domains via h
 
 # Dataset
 We used a dataset RAW_DATA/dnsfields_raw.csv and preprocessed it to lld_labeled.csv
-Use the command line to label dataset sed 's/$/,0/' lld_mm.txt >> lld_mm_labeled.txt
 
 ## Lab data
 We used a mixed dataset created in our lab.

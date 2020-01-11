@@ -23,11 +23,8 @@ from sklearn.externals.six import StringIO
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
-parser.add_argument('--print', help='print Decision Tree')
-
 args = parser.parse_args()
 path = args.path
-print = args.print
 
 """"
 Pre-process data: drop duplicates and empty
@@ -36,33 +33,6 @@ df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
-"""
-Shannon Entropy calulation
-"""
-def calcEntropy(x):
-    p, lens = Counter(x), np.float(len(x))
-    return -np.sum( count/lens * np.log2(count/lens) for count in p.values())
-
-df['entropy'] = [calcEntropy(x) for x in df['lld']]
-
-"""
-LLD record length
-"""
-df['length'] = [len(x) for x in df['lld']]
-
-
-"""
- Number of different characters
-
-"""
-def countChar(x):
-    charsum = 0
-    total = len(x)
-    for char in x:
-        if not char.isalpha():
-            charsum = charsum + 1
-    return float(charsum)/total
-df['numbchars'] = [countChar(x) for x in df['lld']]
 
 print(df.head)
 """
@@ -77,11 +47,12 @@ Simple Decison Tree
 
 dt=DecisionTreeClassifier()
 
+#features, labels
 x = df.drop(['label','lld'], axis=1)
 y = df['label']
 
 # Training set size is 20%
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42, stratify=y)
 dt.fit(x_train,y_train)
 
 print("Accuracy score: ",dt.score(x_test,y_test))
@@ -102,7 +73,7 @@ print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], mar
 print("[+]classification report")
 print(classification_report(y_test, y_pred))
 
-y_pred_proba = classifier.predict_proba(X_test)[:,1]
+y_pred_proba = dt.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
 plt.plot([0,1],[0,1],'k--')
@@ -112,7 +83,8 @@ plt.ylabel('tpr')
 plt.title('Decision Tree ROC curve')
 plt.show()
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
-
+#http://gim.unmc.edu/dxtests/ROC3.htm
+print(".90-1 = excellent (A) .80-.90 = good (B) .70-.80 = fair (C) .60-.70 = poor (D) .50-.60 = fail (F)")
 
 """
 Cross validation k-fold
@@ -124,15 +96,3 @@ model_kfold = DecisionTreeClassifier()
 results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
 
 print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))
-
-"""
-Visualisation Decision tree
-"""
-
-if args.print:
-    dot_data = StringIO()
-    export_graphviz(classifier, out_file=dot_data,
-                    filled=True, rounded=True,
-                    special_characters=True)
-    graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
-    graph.write_png('tree.png')

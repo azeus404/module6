@@ -32,34 +32,6 @@ df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
 """
-Shannon Entropy calulation
-"""
-def calcEntropy(x):
-    p, lens = Counter(x), np.float(len(x))
-    return -np.sum( count/lens * np.log2(count/lens) for count in p.values())
-
-df['entropy'] = [calcEntropy(x) for x in df['lld']]
-
-"""
-LLD record length
-"""
-df['length'] = [len(x) for x in df['lld']]
-
-
-"""
- Number of different characters
-
-"""
-def countChar(x):
-    charsum = 0
-    total = len(x)
-    for char in x:
-        if not char.isalpha():
-            charsum = charsum + 1
-    return float(charsum)/total
-df['numbchars'] = [countChar(x) for x in df['lld']]
-
-"""
 Properties of the dataset
 """
 data_total = df.shape

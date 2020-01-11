@@ -20,7 +20,7 @@ out = args.out
 
 
 """"
-Pre-process data: drop duplicates
+Pre-process data: drop duplicates and empty
 """
 df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
@@ -34,6 +34,10 @@ def calcEntropy(x):
     return -np.sum( count/lens * np.log2(count/lens) for count in p.values())
 
 df['entropy'] = [calcEntropy(x) for x in df['lld']]
+
+"""
+LLD record length
+"""
 df['length'] = [len(x) for x in df['lld']]
 
 
@@ -50,6 +54,7 @@ def countChar(x):
     return float(charsum)/total
 df['numbchars'] = [countChar(x) for x in df['lld']]
 
+
 """
 Metric and statistics of the dataset
 """
@@ -57,6 +62,13 @@ data_total = df.shape
 print('%d %d' % (data_total[0], data_total[1]))
 
 print(df.describe().transpose())
+
+
+print('Minimum length ' + str(df['length'].min()))
+print('Maximum length  ' + str(df['length'].max()))
+
+print('Minimum Entropy ' + str(df['entropy'].min()))
+print('Maximum Entropy ' + str(df['entropy'].max()))
 
 """
 Pearson Spearman correlation

@@ -13,7 +13,7 @@ import argparse
 
 
 from sklearn.model_selection import train_test_split,cross_val_score
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix,roc_auc_score, roc_curve
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import KFold
 
@@ -33,20 +33,6 @@ df.dropna(inplace=True)
 
 
 """
-Shannon Entropy calulation
-"""
-def calcEntropy(x):
-    p, lens = Counter(x), np.float(len(x))
-    return -np.sum( count/lens * np.log2(count/lens) for count in p.values())
-
-df['entropy'] = [calcEntropy(x) for x in df['lld']]
-
-"""
-LLD record length
-"""
-df['length'] = [len(x) for x in df['lld']]
-
-"""
 Random forest
 """
 print("[+] Applying random forest")
@@ -54,7 +40,7 @@ x = df.drop(['label','lld'],axis=1).values
 y = df['label'].values
 
 #create a test set of size of about 20% of the dataset
-x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42)
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42 ,stratify=y)
 
 rt=RandomForestClassifier(n_estimators=35,random_state=1)
 rt.fit(x_train,y_train)
@@ -83,6 +69,21 @@ print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], mar
 
 print("[+]classification report")
 print(classification_report(y_test, y_pred))
+
+#ROC
+y_pred_proba = rt.predict_proba(x_test)[:,1]
+fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
+
+plt.plot([0,1],[0,1],'k--')
+plt.plot(fpr,tpr, label='rf')
+plt.xlabel('fpr')
+plt.ylabel('tpr')
+plt.title('RF ROC curve')
+plt.show()
+print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
+#http://gim.unmc.edu/dxtests/ROC3.htm
+print(".90-1 = excellent (A) .80-.90 = good (B) .70-.80 = fair (C) .60-.70 = poor (D) .50-.60 = fail (F)")
+
 
 """
 Cross validation k-fold

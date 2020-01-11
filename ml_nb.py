@@ -8,8 +8,6 @@ from collections import Counter
 from warnings import filterwarnings
 filterwarnings('ignore')
 
-import argparse
-import tldextract
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split,cross_val_score
@@ -17,6 +15,7 @@ from sklearn.metrics import classification_report, confusion_matrix,roc_curve,ro
 from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import KFold
 
+import argparse
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
 args = parser.parse_args()
@@ -28,34 +27,6 @@ Pre-process data: drop duplicates
 df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
-
-"""
-Shannon Entropy calulation
-"""
-def calcEntropy(x):
-    p, lens = Counter(x), np.float(len(x))
-    return -np.sum( count/lens * np.log2(count/lens) for count in p.values())
-
-df['entropy'] = [calcEntropy(x) for x in df['lld']]
-
-"""
-LLD record length
-"""
-df['length'] = [len(x) for x in df['lld']]
-
-
-"""
- Number of different characters
-
-"""
-def countChar(x):
-    charsum = 0
-    total = len(x)
-    for char in x:
-        if not char.isalpha():
-            charsum = charsum + 1
-    return float(charsum)/total
-df['numbchars'] = [countChar(x) for x in df['lld']]
 
 """
 Properties of the dataset
@@ -74,7 +45,7 @@ x = df.drop(['label','lld'],axis=1).values
 y = df['label'].values
 
 #create a test set of size of about 20% of the dataset
-x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42)
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42, stratify=y)
 
 nb = GaussianNB()
 nb.fit(x_train,y_train)
@@ -108,6 +79,8 @@ plt.ylabel('tpr')
 plt.title('Naive Bayes ROC curve')
 plt.show()
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
+#http://gim.unmc.edu/dxtests/ROC3.htm
+print(".90-1 = excellent (A) .80-.90 = good (B) .70-.80 = fair (C) .60-.70 = poor (D) .50-.60 = fail (F)")
 
 """
 Cross validation k-fold

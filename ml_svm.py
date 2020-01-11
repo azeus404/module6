@@ -13,7 +13,7 @@ import argparse
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.model_selection import KFold
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix,roc_auc_score, roc_curve
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
@@ -29,30 +29,13 @@ df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
-
-"""
-Shannon Entropy calulation
-"""
-def calcEntropy(x):
-    p, lens = Counter(x), np.float(len(x))
-    return -np.sum( count/lens * np.log2(count/lens) for count in p.values())
-
-df['entropy'] = [calcEntropy(x) for x in df['lld']]
-
-
-"""
-LLD record length
-"""
-df['length'] = [len(x) for x in df['lld']]
-
-
 """
 Support vector machine
 
 """
 print("[+] Applying Support Vector Machine")
 
-svm = SVC(random_state = 1,gamma='auto' )
+svm = SVC(random_state = 1,gamma='auto',probability=True )
 
 x = df.drop(['label','lld'],axis=1).values
 y = df['label'].values
@@ -89,10 +72,11 @@ plt.plot([0,1],[0,1],'k--')
 plt.plot(fpr,tpr, label='svm')
 plt.xlabel('fpr')
 plt.ylabel('tpr')
-plt.title('svm ROC curve')
+plt.title('SVM ROC curve')
 plt.show()
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
-
+#http://gim.unmc.edu/dxtests/ROC3.htm
+print(".90-1 = excellent (A) .80-.90 = good (B) .70-.80 = fair (C) .60-.70 = poor (D) .50-.60 = fail (F)")
 
 """
 Cross validation k-fold
