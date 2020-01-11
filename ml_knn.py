@@ -129,7 +129,7 @@ Cross validation k-fold
 """
 from sklearn.model_selection import KFold
 
-kfold = KFold(n_splits=10, random_state=100)
+kfold = KFold(n_splits=10, random_state=42)
 model_kfold = KNeighborsClassifier()
 results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
 

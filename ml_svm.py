@@ -83,7 +83,7 @@ Cross validation k-fold
 """
 print("[+] Cross validation")
 
-kfold = KFold(n_splits=10, random_state=100)
+kfold = KFold(n_splits=10, random_state=42)
 model_kfold = SVC()
 results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
 

@@ -87,7 +87,7 @@ Cross validation k-fold
 """
 
 
-kfold = KFold(n_splits=10, random_state=100)
+kfold = KFold(n_splits=10, random_state=42)
 model_kfold = GaussianNB()
 results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
 
