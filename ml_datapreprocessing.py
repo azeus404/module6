@@ -36,7 +36,7 @@ Shannon Entropy calulation
 """
 def calcEntropy(x):
     p, lens = Counter(x), np.float(len(x))
-    return -np.sum( count/lens * np.log2(count/lens) for count in p.values())
+    return -sum( count/lens * np.log2(count/lens) for count in p.values())
 
 df['entropy'] = [calcEntropy(x) for x in df['lld']]
 

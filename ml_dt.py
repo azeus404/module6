@@ -10,12 +10,11 @@ filterwarnings('ignore')
 
 import pydotplus
 import argparse
+import joblib
 
 from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score,accuracy_score
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.externals import joblib
-
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
