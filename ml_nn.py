@@ -51,6 +51,7 @@ y = df['label'].values
 #create a test set of size of about 20% of the dataset
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42, stratify=y)
 mlp.fit(x_train,y_train)
+
 predict_train = mlp.predict(x_train)
 predict_test = mlp.predict(x_test)
 
