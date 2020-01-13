@@ -15,7 +15,7 @@ Used name conventions: LLD = Lower level domain)
 - Random Forrest
 - Neural network
 
-#Best performance 
+# Best performance
 
 # Related work
 https://www.endgame.com/blog/technical-blog/using-deep-learning-detect-dgas
@@ -42,4 +42,5 @@ We used a mixed dataset created in our lab.
 lld_lab_data.csv
 
 ## The detector
-We made a proof of concept of the detector as a simple web api in flask
+We made a proof of concept of the detector as a detector script
+python detector.py
