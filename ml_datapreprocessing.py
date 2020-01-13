@@ -116,12 +116,13 @@ print(sums)
 """
 Pearson Spearman correlation
 Is there a correlation/linear correlation between domain name length and entropy?
+https://wiki.uva.nl/methodologiewinkel/index.php/Spearman_correlation
+
 """
 sns.set_context(rc={"figure.figsize": (7, 5)})
 g = sns.JointGrid(df.length.astype(float), df.entropy.astype(float))
 g.plot(sns.regplot, sns.distplot, stats.spearmanr);
 print("Pearson's r: {0}".format(stats.pearsonr(df.length.astype(float), df.entropy.astype(float))))
-
 plt.show()
 
 
@@ -170,7 +171,18 @@ if not dfDGA.empty:
 Box plots
 """
 
-df.plot(kind='box', subplots=True, layout=(2,2), sharex=False, sharey=False)
+sns.set(style="whitegrid")
+length = df['length']
+entropy = df['entropy']
+numbchars = df['numbchars']
+numbdots = df['numbdots']
+sns.boxplot(x=length)
+plt.show()
+sns.boxplot(x=entropy)
+plt.show()
+sns.boxplot(x=numbchars)
+plt.show()
+sns.boxplot(x=numbdots)
 plt.show()
 
 """
@@ -183,7 +195,16 @@ print(df.groupby('label').size())
   Histograms Nominal
 """
 
+sns.distplot(dfNominal['length']);
+plt.show()
+
 sns.distplot(dfNominal['entropy']);
+plt.show()
+
+sns.distplot(dfNominal['numbchars']);
+plt.show()
+
+sns.distplot(dfNominal['numbdots']);
 plt.show()
 
 
