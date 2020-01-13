@@ -73,10 +73,14 @@ print("True positive rate = Recall")
 y_pred_proba = nb.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
-plt.plot([0,1],[0,1],'k--')
-plt.plot(fpr,tpr, label='Knn')
-plt.xlabel('fpr')
-plt.ylabel('tpr')
+
+
+plt.plot([0,1],[0,1],'k-',label='random')
+plt.plot([0,0,1,1],[0,1,1,1],'g-',label='perfect')
+plt.plot(fpr,tpr, label='Naive Bayes')
+plt.legend()
+plt.xlabel('False Positive Rate - FPR')
+plt.ylabel('True Positive Rate - TPR')
 plt.title('Naive Bayes ROC curve')
 plt.show()
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))

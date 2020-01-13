@@ -4,7 +4,6 @@ import tldextract
 """
 Extract domains (LLD) dataset
 tokenization
-https://www.endgame.com/blog/technical-blog/using-deep-learning-detect-dgas
 v1
 """
 
@@ -18,6 +17,7 @@ out = args.out
 
 outfile = open(out, "a")
 infile = open(path,'r')
+outfile.write('lld,\n')
 d = infile.readlines()
 for i in d:
     e = tldextract.extract(i)

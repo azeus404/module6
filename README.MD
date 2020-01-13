@@ -15,7 +15,10 @@ Used name conventions: LLD = Lower level domain)
 - Random Forrest
 - Neural network
 
+#Best performance 
+
 # Related work
+https://www.endgame.com/blog/technical-blog/using-deep-learning-detect-dgas
 https://kldavenport.com/detecting-randomly-generated-domains/
 https://www.kaggle.com/amolbhivarkar/knn-for-classification-using-scikit-learn
 
@@ -26,7 +29,7 @@ start jupyter notebook
 2 - Run the defferent machine learing model scripts different ml_<model>.py lld_lab_features_added.csv
 
 # Features
-we used domain name entropy, domain name string length and ratio of aplha numeric characters vs letters in the domain name
+we used domain name entropy, domain name string length and ratio of aplha numeric characters vs letters in the domain name and number of dot's in domain
 
 ## Compare distribution of entropy
 We can compare the distribution of entropy for normal vs Malicious domains via histograms and parametric statistics.
@@ -37,3 +40,6 @@ We used a dataset RAW_DATA/dnsfields_raw.csv and preprocessed it to lld_labeled.
 ## Lab data
 We used a mixed dataset created in our lab.
 lld_lab_data.csv
+
+## The detector
+We made a proof of concept of the detector as a simple web api in flask

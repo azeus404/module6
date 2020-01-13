@@ -19,6 +19,11 @@ path = args.path
 out = args.out
 
 
+"""
+    EXPLORATORY DATA ANALYSIS EDA -
+    https://blog.floydhub.com/introduction-to-anomaly-detection-in-python/
+"""
+
 """"
 Pre-process data: drop duplicates and empty
 """
@@ -54,6 +59,10 @@ def countChar(x):
     return float(charsum)/total
 df['numbchars'] = [countChar(x) for x in df['lld']]
 
+"""
+Number of . in subdomain
+"""
+df['numbdots'] = [x.count('.') for x in df['lld']]
 
 """
 Metric and statistics of the dataset
@@ -70,6 +79,40 @@ print('Maximum length  ' + str(df['length'].max()))
 print('Minimum Entropy ' + str(df['entropy'].min()))
 print('Maximum Entropy ' + str(df['entropy'].max()))
 
+
+#print(df[df.label == 1 ].Survived.sum()/df_train[df_train.Sex == 'female'].Survived.count())
+#print(df[df.label == 0].Survived.sum()/df_train[df_train.Sex == 'male'].Survived.count())
+
+"""
+    create the correlation matrix heat map
+"""
+
+plt.figure(figsize=(14,12))
+sns.heatmap(df.corr(),linewidths=.1,cmap="YlGnBu", annot=True)
+plt.yticks(rotation=0);
+plt.title("Correlation matrix (Heat map)")
+plt.show()
+
+
+"""
+Count by label
+"""
+plt.figure(figsize=(14,12))
+sns.countplot(df.label)
+plt.show()
+
+"""
+Count by label
+"""
+sums = df.lld.groupby(df.label).sum()
+print(sums)
+#plt.axis('equal');
+#plt.pie(sums, labels=sums.index);
+#plt.show()
+#plt.pie(sizes, labels = labels, autopct = "%.2f")
+#plt.axes().set_aspect("equal")
+#plt.show()
+
 """
 Pearson Spearman correlation
 Is there a correlation/linear correlation between domain name length and entropy?
@@ -78,6 +121,7 @@ sns.set_context(rc={"figure.figsize": (7, 5)})
 g = sns.JointGrid(df.length.astype(float), df.entropy.astype(float))
 g.plot(sns.regplot, sns.distplot, stats.spearmanr);
 print("Pearson's r: {0}".format(stats.pearsonr(df.length.astype(float), df.entropy.astype(float))))
+
 plt.show()
 
 
@@ -104,7 +148,6 @@ def shadedHist(df,col,bins):
 Nominal entropy distribution
 """
 sns.set_context(rc={"figure.figsize": (7, 5)})
-
 shadedHist(df[df['label']== 0],'entropy',3)
 plt.show()
 
@@ -135,34 +178,15 @@ plt.show()
 """
 print(df.groupby('label').size())
 
+
 """
-    histograms
+  Histograms Nominal
 """
-df.hist()
+
+sns.distplot(dfNominal['entropy']);
 plt.show()
 
 
-"""
-
-"""
-
-scatter_matrix(df)
-plt.show()
-
-"""
-Entropy compared scatter plot
-Below you can see that our DGA domains do tend to have higher entropy than benign domains on average.
-
-
-malicious = df['label'] == 1
-benign = df['label'] == 0
-plt.scatter(benign['length'],benign['entropy'], s=140, c='#aaaaff', label='Benign', alpha=.2)
-plt.scatter(malicious['length'], malicious['entropy'], s=40, c='r', label='Malicious', alpha=.3)
-plt.legend()
-pylab.xlabel('Domain Length')
-pylab.ylabel('Domain Entropy')
-plt.show()
-"""
 """
 Export dataset to csv
 """

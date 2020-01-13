@@ -30,7 +30,7 @@ df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
 """
-Support vector machine
+Support Vector machine
 
 """
 print("[+] Applying Support Vector Machine")
@@ -69,13 +69,17 @@ print(classification_report(y_true, y_pred))
 y_pred_proba = svm.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
-plt.plot([0,1],[0,1],'k--')
-plt.plot(fpr,tpr, label='svm')
-plt.xlabel('fpr')
-plt.ylabel('tpr')
-plt.title('SVM ROC curve')
+
+
+plt.plot([0,1],[0,1],'k-',label='random')
+plt.plot([0,0,1,1],[0,1,1,1],'g-',label='perfect')
+plt.plot(fpr,tpr, label='Support Vector Machine')
+plt.legend()
+plt.xlabel('False Positive Rate - FPR')
+plt.ylabel('True Positive Rate - TPR')
+plt.title('Support Vector machine ROC curve')
 plt.show()
-print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
+print('Area under the ROC Curve %d' % float(roc_auc_score(y_test,y_pred_proba)))
 #http://gim.unmc.edu/dxtests/ROC3.htm
 print(".90-1 = excellent (A) .80-.90 = good (B) .70-.80 = fair (C) .60-.70 = poor (D) .50-.60 = fail (F)")
 

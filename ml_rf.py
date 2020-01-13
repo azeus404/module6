@@ -74,11 +74,15 @@ print(classification_report(y_test, y_pred))
 y_pred_proba = rt.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
-plt.plot([0,1],[0,1],'k--')
-plt.plot(fpr,tpr, label='rf')
-plt.xlabel('fpr')
-plt.ylabel('tpr')
-plt.title('RF ROC curve')
+
+
+plt.plot([0,1],[0,1],'k-',label='random')
+plt.plot([0,0,1,1],[0,1,1,1],'g-',label='perfect')
+plt.plot(fpr,tpr, label='Random Forest Classifier')
+plt.legend()
+plt.xlabel('False Positive Rate - FPR')
+plt.ylabel('True Positive Rate - TPR')
+plt.title('Random Forest ROC curve')
 plt.show()
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
 #http://gim.unmc.edu/dxtests/ROC3.htm
