@@ -9,6 +9,7 @@ from warnings import filterwarnings
 filterwarnings('ignore')
 
 import argparse
+import joblib
 
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split,cross_val_score
@@ -17,9 +18,10 @@ from sklearn.metrics import classification_report, confusion_matrix,roc_auc_scor
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
-
+parser.add_argument('--deploy', help='export model for deployment')
 args = parser.parse_args()
 path = args.path
+deploy = args.deploy
 
 
 """"
@@ -46,6 +48,11 @@ x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=
 svm.fit(x_train,y_train)
 
 print("Accuracy score: ",svm.score(x_test,y_test))
+
+if args.deploy:
+    print("[+]Model ready for deployment")
+    joblib.dump(svm, 'svm_model.pkl')
+
 
 """
 Performance

@@ -14,6 +14,7 @@ import joblib
 
 from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score,accuracy_score
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, recall_score
 from sklearn.tree import DecisionTreeClassifier
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
@@ -68,13 +69,21 @@ y_true = y_test
 
 print("[+]Confusion matrix")
 #confusion_matrix(df.actual_label.values, df.predicted_RF.values)
-print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
+print(pd.crosstab(y_test, y_pred, rownames=['Actual'], colnames=['Predicted'], margins=True))
 
 print("[+]classification report")
 print(classification_report(y_test, y_pred))
 
 y_pred_proba = dt.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
+
+
+
+print('Accuracy %d' % accuracy_score(y_test, y_pred ))
+
+print('What percent of positive predictions were correct? F-1 %d' % f1_score(y_test, y_pred ))
+
+print('Recall (TRP) %d' % recall_score(y_test, y_pred))
 
 #https://towardsdatascience.com/understanding-data-science-classification-metrics-in-scikit-learn-in-python-3bc336865019
 
@@ -97,8 +106,9 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.show()
 """
-print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
+
 #http://gim.unmc.edu/dxtests/ROC3.htm
+print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
 print(".90-1 = excellent (A) .80-.90 = good (B) .70-.80 = fair (C) .60-.70 = poor (D) .50-.60 = fail (F)")
 
 """

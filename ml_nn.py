@@ -9,6 +9,7 @@ from warnings import filterwarnings
 filterwarnings('ignore')
 
 import argparse
+import joblib
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split,cross_val_score
@@ -18,8 +19,10 @@ from sklearn.model_selection import KFold
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
+parser.add_argument('--deploy', help='export model for deployment')
 args = parser.parse_args()
 path = args.path
+deploy = args.deploy
 
 
 """"
@@ -56,6 +59,10 @@ predict_train = mlp.predict(x_train)
 predict_test = mlp.predict(x_test)
 
 print("Accuracy score: ",mlp.score(x_test,y_test))
+
+if args.deploy:
+    print("[+]Model ready for deployment")
+    joblib.dump(mlp, 'nn_model.pkl')
 
 """
 Performance

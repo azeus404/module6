@@ -10,7 +10,7 @@ filterwarnings('ignore')
 from tabulate import tabulate
 
 import argparse
-
+import joblib
 
 from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.metrics import classification_report, confusion_matrix,roc_auc_score, roc_curve
@@ -19,9 +19,10 @@ from sklearn.model_selection import KFold
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
+parser.add_argument('--deploy', help='export model for deployment')
 args = parser.parse_args()
 path = args.path
-
+deploy = args.deploy
 
 
 """"
@@ -45,7 +46,11 @@ x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=
 rt=RandomForestClassifier(n_estimators=35,random_state=1)
 rt.fit(x_train,y_train)
 
-print("score: ",rt.score(x_test,y_test))
+print("Accuracy score:",rt.score(x_test,y_test))
+
+if args.deploy:
+    print("[+]Model ready for deployment")
+    joblib.dump(rf, 'rf_model.pkl')
 
 """
 Feature importance
@@ -74,8 +79,6 @@ print(classification_report(y_test, y_pred))
 y_pred_proba = rt.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
-
-
 plt.plot([0,1],[0,1],'k-',label='random')
 plt.plot([0,0,1,1],[0,1,1,1],'g-',label='perfect')
 plt.plot(fpr,tpr, label='Random Forest Classifier')
@@ -84,8 +87,9 @@ plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Random Forest ROC curve')
 plt.show()
-print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
+
 #http://gim.unmc.edu/dxtests/ROC3.htm
+print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
 print(".90-1 = excellent (A) .80-.90 = good (B) .70-.80 = fair (C) .60-.70 = poor (D) .50-.60 = fail (F)")
 
 

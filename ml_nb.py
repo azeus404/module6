@@ -8,6 +8,8 @@ from collections import Counter
 from warnings import filterwarnings
 filterwarnings('ignore')
 
+import argparse
+import joblib
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split,cross_val_score
@@ -15,11 +17,14 @@ from sklearn.metrics import classification_report, confusion_matrix,roc_curve,ro
 from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import KFold
 
-import argparse
+
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
+parser.add_argument('--deploy', help='export model for deployment')
 args = parser.parse_args()
 path = args.path
+deploy = args.deploy
+
 
 """"
 Pre-process data: drop duplicates
@@ -52,6 +57,11 @@ nb.fit(x_train,y_train)
 
 print("Accuracy score: ",nb.score(x_test,y_test))
 
+
+if args.deploy:
+    print("[+]Model ready for deployment")
+    joblib.dump(nb, 'nb_model.pkl')
+
 """
 Performance
 - Confusion matrix
@@ -83,8 +93,9 @@ plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Naive Bayes ROC curve')
 plt.show()
-print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
+
 #http://gim.unmc.edu/dxtests/ROC3.htm
+print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
 print(".90-1 = excellent (A) .80-.90 = good (B) .70-.80 = fair (C) .60-.70 = poor (D) .50-.60 = fail (F)")
 
 """

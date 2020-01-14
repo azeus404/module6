@@ -31,6 +31,8 @@ df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
+
+print("[*] Adding features")
 """
 Shannon Entropy calulation
 """
@@ -65,6 +67,12 @@ Number of . in subdomain
 df['numbdots'] = [x.count('.') for x in df['lld']]
 
 """
+Number of character in subdomain
+"""
+df['numunique'] = [len(set(x)) for x in df['lld']]
+
+
+"""
 Metric and statistics of the dataset
 """
 data_total = df.shape
@@ -72,7 +80,10 @@ print('%d %d' % (data_total[0], data_total[1]))
 
 print(df.describe().transpose())
 
+# % of the dataset is malicious
+print('percent of the dataset is malicious %d' % ((len(df.loc[df.label==1])) / (len(df.loc[df.label == 0])) * 100))
 
+print('[*] Entropy values of total dataset')
 print('Minimum length ' + str(df['length'].min()))
 print('Maximum length  ' + str(df['length'].max()))
 
@@ -80,14 +91,11 @@ print('Minimum Entropy ' + str(df['entropy'].min()))
 print('Maximum Entropy ' + str(df['entropy'].max()))
 
 
-#print(df[df.label == 1 ].Survived.sum()/df_train[df_train.Sex == 'female'].Survived.count())
-#print(df[df.label == 0].Survived.sum()/df_train[df_train.Sex == 'male'].Survived.count())
-
 """
     create the correlation matrix heat map
 """
 
-plt.figure(figsize=(14,12))
+plt.figure(figsize=(7, 5))
 sns.heatmap(df.corr(),linewidths=.1,cmap="YlGnBu", annot=True)
 plt.yticks(rotation=0);
 plt.title("Correlation matrix (Heat map)")
@@ -97,9 +105,21 @@ plt.show()
 """
 Count by label
 """
-plt.figure(figsize=(14,12))
+
+plt.figure(figsize=(7, 5))
+plt.title("Distribution of DNS domains Malicious vs Benign")
 sns.countplot(df.label)
 plt.show()
+
+plt.title("Distribution of DNS domains Malicious vs Benign")
+labels=df["label"].value_counts().index
+sizes=df["label"].value_counts().values
+plt.figure(figsize=(11,11))
+plt.pie(sizes,labels=("Benign","Malicious"),autopct="%1.f%%")
+plt.title("Value counts of label",size=25)
+plt.legend()
+plt.show()
+print("Numbers of Value counts\n",df.loc[:,'label'].value_counts())
 
 """
 Count by label
@@ -127,12 +147,15 @@ plt.show()
 
 
 """
-Nominal parametric upper
+Benign parametric upper
 """
+
 #Regular DNS
-dfNominal = df[df['label']== 0]
+dfBenign = df[df['label']== 0]
+
 ##DNS exfill
-dfDGA = df[df['label']== 1]
+
+dfMalicious= df[df['label']== 1]
 
 def shadedHist(df,col,bins):
     df[col].hist(bins = bins, color = 'dodgerblue', alpha = .6, normed = False)
@@ -146,43 +169,93 @@ def shadedHist(df,col,bins):
     plt.title(col)
 
 """
-Nominal entropy distribution
+Benign entropy distribution
 """
+
 sns.set_context(rc={"figure.figsize": (7, 5)})
 shadedHist(df[df['label']== 0],'entropy',3)
 plt.show()
 
 
-nominal_parametric_upper = dfNominal['entropy'].mean() + \
-      2 * dfNominal['entropy'].std()
+nominal_parametric_upper = dfBenign['entropy'].mean() + \
+      2 * dfBenign['entropy'].std()
 
-print("upper",nominal_parametric_upper)
+print("Benign upper entropy",nominal_parametric_upper)
 
-if not dfDGA.empty:
+if not dfMalicious.empty:
     """
     Malicious entropy distribution
     """
     sns.set_context(rc={"figure.figsize": (7, 5)})
-    shadedHist(dfDGA,'entropy',3)
+    shadedHist(dfMalicious,'entropy',3)
     plt.show()
 
+"""
 
 """
-Box plots
+sns.pairplot(df)
+plt.show()
+
+"""
+ Box plots Benign dataset
 """
 
 sns.set(style="whitegrid")
-length = df['length']
-entropy = df['entropy']
-numbchars = df['numbchars']
-numbdots = df['numbdots']
+length = dfBenign['length']
+entropy = dfBenign['entropy']
+numbchars = dfBenign['numbchars']
+numbdots = dfBenign['numbdots']
+numunique = dfBenign['numunique']
+
+plt.title("Benign dataset")
 sns.boxplot(x=length)
 plt.show()
+
+plt.title("Benign dataset")
 sns.boxplot(x=entropy)
 plt.show()
+
+plt.title("Benign dataset")
 sns.boxplot(x=numbchars)
 plt.show()
+
+plt.title("Benign dataset")
 sns.boxplot(x=numbdots)
+plt.show()
+
+plt.title("Benign dataset")
+sns.boxplot(x=numunique)
+plt.show()
+
+"""
+  Box plots Malicious
+"""
+
+sns.set(style="whitegrid")
+length = dfMalicious['length']
+entropy = dfMalicious['entropy']
+numbchars = dfMalicious['numbchars']
+numbdots = dfMalicious['numbdots']
+numunique = dfMalicious['numunique']
+
+plt.title("Malicious dataset")
+sns.boxplot(x=length)
+plt.show()
+
+plt.title("Malicious dataset")
+sns.boxplot(x=entropy)
+plt.show()
+
+plt.title("Malicious dataset")
+sns.boxplot(x=numbchars)
+plt.show()
+
+plt.title("Malicious dataset")
+sns.boxplot(x=numbdots)
+plt.show()
+
+plt.title("Malicious dataset")
+sns.boxplot(x=numunique)
 plt.show()
 
 """
@@ -192,21 +265,50 @@ print(df.groupby('label').size())
 
 
 """
-  Histograms Nominal
+  Histograms  Benign
 """
-
-sns.distplot(dfNominal['length']);
+plt.title("Benign")
+sns.distplot(dfBenign['length']);
 plt.show()
 
-sns.distplot(dfNominal['entropy']);
+plt.title("Benign")
+sns.distplot(dfBenign['entropy']);
 plt.show()
 
-sns.distplot(dfNominal['numbchars']);
+plt.title("Benign")
+sns.distplot(dfBenign['numbchars']);
 plt.show()
 
-sns.distplot(dfNominal['numbdots']);
+plt.title("Benign")
+sns.distplot(dfBenign['numbdots']);
 plt.show()
 
+plt.title("Benign")
+sns.distplot(dfBenign['numunique']);
+plt.show()
+
+"""
+    Histograms Malicious
+"""
+plt.title("Malicious")
+sns.distplot(dfMalicious['length']);
+plt.show()
+
+plt.title("Malicious")
+sns.distplot(dfMalicious['entropy']);
+plt.show()
+
+plt.title("Malicious")
+sns.distplot(dfMalicious['numbchars']);
+plt.show()
+
+plt.title("Malicious")
+sns.distplot(dfMalicious['numbdots']);
+plt.show()
+
+plt.title("Malicious")
+sns.distplot(dfMalicious['numunique']);
+plt.show()
 
 """
 Export dataset to csv

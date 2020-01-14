@@ -12,7 +12,7 @@ Collinear Features
 Zero Importance Features
 Low Importance Features
 
-In this script
+In this script:
 Univariate Selection.
 Recursive Feature Elimination.
 Principle Component Analysis.
@@ -32,7 +32,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 
 # load data
-df = pd.read_csv('lld_lab_features_added.csv',encoding='utf-8')
+df = pd.read_csv('../lld_lab_dnscat_features_added.csv',encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 X = df.drop(['label','lld'],axis=1).values
@@ -51,7 +51,7 @@ print(features[0:3,:])
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LogisticRegression
 # load data
-df = pd.read_csv('lld_lab_features_added.csv',encoding='utf-8')
+df = pd.read_csv('../lld_lab_dnscat_features_added.csv',encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
@@ -61,6 +61,7 @@ Y = df['label'].values
 model = LogisticRegression(solver='lbfgs')
 rfe = RFE(model, 3)
 fit = rfe.fit(X, Y)
+
 print("Num Features: %d" % fit.n_features_)
 print("Selected Features: %s" % fit.support_)
 print("Feature Ranking: %s" % fit.ranking_)
@@ -70,7 +71,7 @@ import numpy
 from pandas import read_csv
 from sklearn.decomposition import PCA
 # load data
-df = pd.read_csv('lld_lab_features_added.csv',encoding='utf-8')
+df = pd.read_csv('../lld_lab_dnscat_features_added.csv',encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
@@ -87,7 +88,7 @@ print(fit.components_)
 import pandas as pd
 from sklearn.ensemble import ExtraTreesClassifier
 # load data
-df = pd.read_csv('lld_lab_features_added.csv',encoding='utf-8')
+df = pd.read_csv('../lld_lab_dnscat_features_added.csv',encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 

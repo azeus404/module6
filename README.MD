@@ -23,24 +23,31 @@ https://kldavenport.com/detecting-randomly-generated-domains/
 https://www.kaggle.com/amolbhivarkar/knn-for-classification-using-scikit-learn
 
 # Setup & run script
-0 - Install the requirements pipenv install -r requirements.txt
+1. Install the requirements pipenv install -r requirements.txt
 start jupyter notebook
-1 - Run preprocessing script python ml_datapreprocessing.py lld_lab_data.csv --out lld_lab_features_added.csv
-2 - Run the defferent machine learing model scripts different ml_<model>.py lld_lab_features_added.csv
+2. Run preprocessing script python ml_datapreprocessing.py lld_lab_data.csv --out lld_lab_features_added.csv
+3. Run the different machine learning model scripts different ml_<model>.py lld_lab_features_added.csv
 
 # Features
-we used domain name entropy, domain name string length and ratio of aplha numeric characters vs letters in the domain name and number of dot's in domain
+we extracted the DNS subdomain form the testdata and derived some features of this string:
+- subdomain entropy
+- subdomain string length
+- ratio of alpha numeric characters vs letters in the subdomain
+- number of dot's in subdomain
+- number of unique character in subdomain
+
+We selected these features because tunnel queries are mainly non-human readable of pronounceable.
 
 ## Compare distribution of entropy
 We can compare the distribution of entropy for normal vs Malicious domains via histograms and parametric statistics.
 
 # Dataset
-We used a dataset RAW_DATA/dnsfields_raw.csv and preprocessed it to lld_labeled.csv
+we used two full network captures of a lab.
 
 ## Lab data
 We used a mixed dataset created in our lab.
-lld_lab_data.csv
+One used DNScat and the other Iodinde for DNS covert channels supplemented it with benign traffic by running a tool called PartyLoud https://github.com/realtho/PartyLoud to create benign DNS traffic
 
 ## The detector
-We made a proof of concept of the detector as a detector script
+We made a proof of concept of the detector python script
 python detector.py

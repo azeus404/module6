@@ -1,9 +1,9 @@
 # Load libraries
 import pandas as pd
 import numpy as np
-
+import matplotlib.pyplot as plt
 from pandas.plotting import scatter_matrix
-from matplotlib import pyplot
+
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import StratifiedKFold
@@ -20,30 +20,42 @@ from sklearn.svm import SVC
 
 from collections import Counter
 
+
+import argparse
+
+
+parser = argparse.ArgumentParser(description='Process lld_labeled')
+parser.add_argument('path', help='domainlist')
+
+
+args = parser.parse_args()
+path = args.path
+
 """
  Test
 """
-df = pd.read_csv('lld_lab_data.csv', encoding='utf-8')
+df = pd.read_csv(path, encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
-
+print("[*] Adding features")
 """
 Shannon Entropy calulation
 """
 def calcEntropy(x):
     p, lens = Counter(x), np.float(len(x))
-    return -np.sum(count/lens * np.log2(count/lens) for count in p.values())
+    return -sum( count/lens * np.log2(count/lens) for count in p.values())
 
 df['entropy'] = [calcEntropy(x) for x in df['lld']]
 
 """
-LLD record lenght
+LLD record length
 """
 df['length'] = [len(x) for x in df['lld']]
 
 
 """
+
  Number of different characters
 
 """
@@ -56,12 +68,27 @@ def countChar(x):
     return float(charsum)/total
 df['numbchars'] = [countChar(x) for x in df['lld']]
 
+"""
+Number of . in subdomain
+"""
+df['numbdots'] = [x.count('.') for x in df['lld']]
 
+"""
+Number of character in subdomain
+"""
+df['numunique'] = [len(set(x)) for x in df['lld']]
+
+
+"""
+
+    Build models
+
+"""
 models = []
 models.append(('NN',MLPClassifier()))
 models.append(('LR', LogisticRegression(solver='liblinear', multi_class='ovr')))
 models.append(('KNN', KNeighborsClassifier()))
-models.append(('CART', DecisionTreeClassifier()))
+models.append(('DT', DecisionTreeClassifier()))
 models.append(('NB', GaussianNB()))
 models.append(('SVM', SVC(gamma='auto')))
 
@@ -81,3 +108,11 @@ for name, model in models:
 	results.append(cv_results)
 	names.append(name)
 	print('%s: %f (%f)' % (name, cv_results.mean(), cv_results.std()))
+
+# boxplot algorithm comparison
+fig = plt.figure()
+fig.suptitle('Algorithm Comparison')
+ax = fig.add_subplot(111)
+plt.boxplot(results)
+ax.set_xticklabels(names)
+plt.show()

@@ -9,7 +9,7 @@ from warnings import filterwarnings
 filterwarnings('ignore')
 
 import argparse
-
+import joblib
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split,cross_val_score
@@ -19,8 +19,10 @@ from sklearn.metrics import classification_report, confusion_matrix,roc_curve,ro
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='domainlist')
+parser.add_argument('--deploy', help='export model for deployment')
 args = parser.parse_args()
 path = args.path
+deploy = args.deploy
 
 
 
@@ -49,11 +51,15 @@ y = df['label'].values
 #create a test set of size of about 20% of the dataset
 x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42, stratify=y)
 
-lr=LogisticRegression(solver='lbfgs')
+lr = LogisticRegression(solver='lbfgs')
 lr.fit(x_train,y_train)
 
 print("Accuracy score: ",lr.score(x_test,y_test))
-#print(accuracy_score(x_test,y_test))
+
+
+if args.deploy:
+    print("[+]Model ready for deployment")
+    joblib.dump(lr, 'logreg_model.pkl')
 
 """
 Performance
@@ -85,7 +91,11 @@ plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Logistic Regression ROC curve')
 plt.show()
+
+#http://gim.unmc.edu/dxtests/ROC3.htm
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
+print(".90-1 = excellent (A) .80-.90 = good (B) .70-.80 = fair (C) .60-.70 = poor (D) .50-.60 = fail (F)")
+
 
 """
 Cross validation k-fold
