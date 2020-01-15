@@ -37,13 +37,12 @@ df.dropna(inplace=True)
 Properties of the dataset
 """
 data_total = df.shape
-print('%d %d' % (data_total[0], data_total[1]))
-print('Total domains %d' % data_total[0])
+print('Total llds %d' % data_total[0])
 
 """
 Neural network
 """
-print("[+]Applying Neural Network")
+print("[+] Applying Neural Network")
 
 mlp = MLPClassifier(hidden_layer_sizes=(8,8,8), activation='relu', solver='adam', max_iter=500)
 
@@ -78,9 +77,12 @@ print("[+]Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
 
 print("[+]classification report")
-print(classification_report(y_test, y_pred))
+target_names = ['Malicious', 'Benign']
+report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
+print(pd.DataFrame(report).transpose())
+print("True positive rate = Recall")
 
-#ROC
+print("[+] ROC")
 y_pred_proba = mlp.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
@@ -92,7 +94,9 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Neural Network ROC curve')
+plt.savefig('roc_nn.png')
 plt.show()
+
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))
 #http://gim.unmc.edu/dxtests/ROC3.htm
 print(".90-1 = excellent (A) .80-.90 = good (B) .70-.80 = fair (C) .60-.70 = poor (D) .50-.60 = fail (F)")

@@ -36,14 +36,13 @@ df.dropna(inplace=True)
 """
 Properties of the dataset
 """
+print("[+] Properties of the dataset")
 data_total = df.shape
-print('%d %d' % (data_total[0], data_total[1]))
-print('Total domains %d' % data_total[0])
+print('Total llds %d' % df.shape[0])
 
 """
 Naive Bayes
 """
-
 print("[+]Applying Naive Bayes")
 
 x = df.drop(['label','lld'],axis=1).values
@@ -76,10 +75,12 @@ print("[+]Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
 
 print("[+]classification report")
-print(classification_report(y_test, y_pred))
+target_names = ['Malicious', 'Benign']
+report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
+print(pd.DataFrame(report).transpose())
 print("True positive rate = Recall")
 
-#ROC
+print("[+] ROC")
 y_pred_proba = nb.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
@@ -92,6 +93,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Naive Bayes ROC curve')
+plt.savefig('roc_nb.png')
 plt.show()
 
 #http://gim.unmc.edu/dxtests/ROC3.htm

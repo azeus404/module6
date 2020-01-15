@@ -36,20 +36,19 @@ df.dropna(inplace=True)
 """
 Properties of the dataset
 """
+print("[+]Properties of the dataset")
 data_total = df.shape
-print('%d %d' % (data_total[0], data_total[1]))
-print('Total domains %d' % data_total[0])
+print('Total lld's %d' % df.shape[0])
 
 """
 Logistic Regression
 """
-
-
+print("[+] Applying Logistic Regression")
 x = df.drop(['label','lld'],axis=1).values
 y = df['label'].values
 
 #create a test set of size of about 20% of the dataset
-x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42, stratify=y)
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42, stratify=y,shuffle=True)
 
 lr = LogisticRegression(solver='lbfgs')
 lr.fit(x_train,y_train)
@@ -76,9 +75,12 @@ print("[+]Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
 
 print("[+]classification report")
-print(classification_report(y_test, y_pred))
+target_names = ['Malicious', 'Benign']
+report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
+print(pd.DataFrame(report).transpose())
+print("True positive rate = Recall")
 
-#ROC
+print("[+] ROC")
 y_pred_proba = lr.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
@@ -90,6 +92,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Logistic Regression ROC curve')
+plt.savefig('roc_logreg.png')
 plt.show()
 
 #http://gim.unmc.edu/dxtests/ROC3.htm

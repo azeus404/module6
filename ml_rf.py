@@ -34,9 +34,16 @@ df.dropna(inplace=True)
 
 
 """
+Properties of the dataset
+"""
+data_total = df.shape
+print('%d %d' % (data_total[0], data_total[1]))
+print('Total llds %d' % data_total[0])
+
+"""
 Random forest
 """
-print("[+] Applying random forest")
+print("[+] Applying Random Forest")
 x = df.drop(['label','lld'],axis=1).values
 y = df['label'].values
 
@@ -73,9 +80,12 @@ print("[+]Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
 
 print("[+]classification report")
-print(classification_report(y_test, y_pred))
+target_names = ['Malicious', 'Benign']
+report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
+print(pd.DataFrame(report).transpose())
+print("True positive rate = Recall")
 
-#ROC
+print("[+] ROC")
 y_pred_proba = rt.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
@@ -86,6 +96,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Random Forest ROC curve')
+plt.savefig('roc_rf.png')
 plt.show()
 
 #http://gim.unmc.edu/dxtests/ROC3.htm

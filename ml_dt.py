@@ -23,6 +23,7 @@ parser.add_argument('--deploy', help='export model for deployment')
 args = parser.parse_args()
 path = args.path
 deploy = args.deploy
+
 """"
 Pre-process data: drop duplicates and empty
 """
@@ -33,13 +34,13 @@ df.dropna(inplace=True)
 """
 Properties of the dataset
 """
-#print('%d %d' % (df.shape[0], df.shape[1]))
-#print('Total domains %d' % df.shape[0])
+print("[+] Properties of the dataset")
+print('Total lld's %d' % df.shape[0])
 
 """
 Simple Decison Tree
 """
-
+print("[+] Applying Simple Decison Tree")
 dt=DecisionTreeClassifier()
 
 #features, labels
@@ -47,7 +48,7 @@ x = df.drop(['label','lld'], axis=1)
 y = df['label']
 
 # Training set size is 20%
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42, stratify=y)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42, stratify=y,shuffle=True)
 
 #train
 dt.fit(x_train,y_train)
@@ -71,8 +72,14 @@ print("[+]Confusion matrix")
 #confusion_matrix(df.actual_label.values, df.predicted_RF.values)
 print(pd.crosstab(y_test, y_pred, rownames=['Actual'], colnames=['Predicted'], margins=True))
 
+sns.heatmap(pd.crosstab(y_test, y_pred, rownames=['Actual'], colnames=['Predicted'], margins=True),cmap="YlGnBu", annot=True, cbar=False)
+plt.show()
+
 print("[+]classification report")
-print(classification_report(y_test, y_pred))
+target_names = ['Malicious', 'Benign']
+report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
+print(pd.DataFrame(report).transpose())
+print("True positive rate = Recall")
 
 y_pred_proba = dt.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
@@ -86,7 +93,7 @@ print('What percent of positive predictions were correct? F-1 %d' % f1_score(y_t
 print('Recall (TRP) %d' % recall_score(y_test, y_pred))
 
 #https://towardsdatascience.com/understanding-data-science-classification-metrics-in-scikit-learn-in-python-3bc336865019
-
+print("[+] ROC")
 plt.plot([0,1],[0,1],'k-',label='random')
 plt.plot([0,0,1,1],[0,1,1,1],'g-',label='perfect')
 plt.plot(fpr,tpr, label='Decision Tree Classifier')
@@ -94,18 +101,9 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Decision Tree ROC curve')
+plt.savefig('roc_dt.png')
 plt.show()
 
-"""
-plt.plot(fpr_RF, tpr_RF,'r-',label = 'RF AUC: %.3f'%auc_RF)
-plt.plot(fpr_LR,tpr_LR,'b-', label= 'LR AUC: %.3f'%auc_LR)
-plt.plot([0,1],[0,1],'k-',label='random')
-plt.plot([0,0,1,1],[0,1,1,1],'g-',label='perfect')
-plt.legend()
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.show()
-"""
 
 #http://gim.unmc.edu/dxtests/ROC3.htm
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))

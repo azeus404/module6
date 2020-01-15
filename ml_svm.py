@@ -32,6 +32,12 @@ df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
 """
+Properties of the dataset
+"""
+data_total = df.shape
+print('Total llds %d' % data_total[0])
+
+"""
 Support Vector machine
 
 """
@@ -58,8 +64,6 @@ if args.deploy:
 Performance
 
 """
-
-
 y_pred = svm.predict(x_test)
 y_true = y_test
 
@@ -68,11 +72,13 @@ print(pd.crosstab(y_true, y_pred, rownames=['True'], colnames=['Predicted'], mar
 
 
 print("[+]classification report")
-#https://muthu.co/understanding-the-classification-report-in-sklearn/
-print(classification_report(y_true, y_pred))
+target_names = ['Malicious', 'Benign']
+report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
+print(pd.DataFrame(report).transpose())
+print("True positive rate = Recall")
 
 
-#ROC
+print("[+] ROC")
 y_pred_proba = svm.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
@@ -85,6 +91,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Support Vector machine ROC curve')
+plt.savefig('roc_svm.png')
 plt.show()
 print('Area under the ROC Curve %d' % float(roc_auc_score(y_test,y_pred_proba)))
 #http://gim.unmc.edu/dxtests/ROC3.htm

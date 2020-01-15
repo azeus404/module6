@@ -7,6 +7,7 @@ This method uses lexical features of DNS names to predict if a domain query is b
 
 Used name conventions: LLD = Lower level domain)
 # classification models
+We used models for supervised learning:
 - K-Nearest Neighbor (KNN)
 - Logistic Regression
 - Support Vector Machine (SVM)
@@ -16,6 +17,11 @@ Used name conventions: LLD = Lower level domain)
 - Neural network
 
 # Best performance
+We use:
+# https://muthu.co/understanding-the-classification-report-in-sklearn/
+- classification_report
+- confusion_matrix
+- ROC/AUC
 
 # Related work
 https://www.endgame.com/blog/technical-blog/using-deep-learning-detect-dgas
