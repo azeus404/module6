@@ -36,9 +36,9 @@ df.dropna(inplace=True)
 """
 Properties of the dataset
 """
-print("[+]Properties of the dataset")
+print("[+] Properties of the dataset")
 data_total = df.shape
-print('Total lld's %d' % df.shape[0])
+print('Total llds' %d' % df.shape[0])
 
 """
 Logistic Regression
