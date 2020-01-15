@@ -56,7 +56,7 @@ svm.fit(x_train,y_train)
 print("Accuracy score: ",svm.score(x_test,y_test))
 
 if args.deploy:
-    print("[+]Model ready for deployment")
+    print("[+] Model ready for deployment")
     joblib.dump(svm, 'models/svm_model.pkl')
 
 
@@ -91,7 +91,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Support Vector machine ROC curve')
-plt.savefig('roc_svm.png')
+plt.savefig('img/roc_svm.png')
 plt.show()
 print('Area under the ROC Curve %d' % float(roc_auc_score(y_test,y_pred_proba)))
 #http://gim.unmc.edu/dxtests/ROC3.htm

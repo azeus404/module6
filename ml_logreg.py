@@ -57,7 +57,7 @@ print("Accuracy score: ",lr.score(x_test,y_test))
 
 
 if args.deploy:
-    print("[+]Model ready for deployment")
+    print("[+] Model ready for deployment")
     joblib.dump(lr, 'models/logreg_model.pkl')
 
 """
@@ -92,7 +92,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Logistic Regression ROC curve')
-plt.savefig('roc_logreg.png')
+plt.savefig('img/roc_logreg.png')
 plt.show()
 
 #http://gim.unmc.edu/dxtests/ROC3.htm

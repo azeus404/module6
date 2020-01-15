@@ -76,10 +76,10 @@ Performance
 y_pred = rt.predict(x_test)
 y_true = y_test
 
-print("[+]Confusion matrix")
+print("[+] Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
 
-print("[+]classification report")
+print("[+] classification report")
 target_names = ['Malicious', 'Benign']
 report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
 print(pd.DataFrame(report).transpose())
@@ -96,7 +96,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Random Forest ROC curve')
-plt.savefig('roc_rf.png')
+plt.savefig('img/roc_rf.png')
 plt.show()
 
 #http://gim.unmc.edu/dxtests/ROC3.htm

@@ -60,7 +60,7 @@ predict_test = mlp.predict(x_test)
 print("Accuracy score: ",mlp.score(x_test,y_test))
 
 if args.deploy:
-    print("[+]Model ready for deployment")
+    print("[+] Model ready for deployment")
     joblib.dump(mlp, 'models/nn_model.pkl')
 
 """
@@ -94,7 +94,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Neural Network ROC curve')
-plt.savefig('roc_nn.png')
+plt.savefig('img/roc_nn.png')
 plt.show()
 
 print('Area under the ROC Curve %d' % roc_auc_score(y_test,y_pred_proba))

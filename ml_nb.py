@@ -93,7 +93,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Naive Bayes ROC curve')
-plt.savefig('roc_nb.png')
+plt.savefig('img/roc_nb.png')
 plt.show()
 
 #http://gim.unmc.edu/dxtests/ROC3.htm
