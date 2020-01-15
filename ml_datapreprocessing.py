@@ -10,9 +10,9 @@ from collections import Counter
 import argparse
 import tldextract
 
-parser = argparse.ArgumentParser(description='Process lld_labeled')
-parser.add_argument('path', help='domainlist')
-parser.add_argument('--out', help='export dataset')
+parser = argparse.ArgumentParser(description='Process labeled lld list')
+parser.add_argument('path', help='location of lld list')
+parser.add_argument('--out', help='export dataset with features')
 
 args = parser.parse_args()
 path = args.path
