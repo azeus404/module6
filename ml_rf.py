@@ -57,7 +57,7 @@ print("Accuracy score:",rt.score(x_test,y_test))
 
 if args.deploy:
     print("[+]Model ready for deployment")
-    joblib.dump(rf, 'rf_model.pkl')
+    joblib.dump(rf, 'models/rf_model.pkl')
 
 """
 Feature importance

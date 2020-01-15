@@ -59,7 +59,7 @@ print("Accuracy score: ",nb.score(x_test,y_test))
 
 if args.deploy:
     print("[+]Model ready for deployment")
-    joblib.dump(nb, 'nb_model.pkl')
+    joblib.dump(nb, 'models/nb_model.pkl')
 
 """
 Performance

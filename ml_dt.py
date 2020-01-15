@@ -55,8 +55,8 @@ dt.fit(x_train,y_train)
 print("Accuracy score: ", dt.score(x_test,y_test))
 
 if args.deploy:
-    print("[+]Model ready for deployment")
-    joblib.dump(dt, 'dt_model.pkl')
+    print("[+] Model ready for deployment")
+    joblib.dump(dt, 'models/dt_model.pkl')
 
 """
 Performance

@@ -61,7 +61,7 @@ print("Accuracy score: ",mlp.score(x_test,y_test))
 
 if args.deploy:
     print("[+]Model ready for deployment")
-    joblib.dump(mlp, 'nn_model.pkl')
+    joblib.dump(mlp, 'models/nn_model.pkl')
 
 """
 Performance

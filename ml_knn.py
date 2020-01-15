@@ -85,8 +85,8 @@ knn.fit(x_train,y_train)
 knn.score(x_test,y_test)
 
 if args.deploy:
-    print("[+]Model ready for deployment")
-    joblib.dump(knn, 'knn_model.pkl')
+    print("[+] Model ready for deployment")
+    joblib.dump(knn, 'models/knn_model.pkl')
 
 
 

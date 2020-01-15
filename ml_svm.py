@@ -57,7 +57,7 @@ print("Accuracy score: ",svm.score(x_test,y_test))
 
 if args.deploy:
     print("[+]Model ready for deployment")
-    joblib.dump(svm, 'svm_model.pkl')
+    joblib.dump(svm, 'models/svm_model.pkl')
 
 
 """

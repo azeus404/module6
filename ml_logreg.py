@@ -58,7 +58,7 @@ print("Accuracy score: ",lr.score(x_test,y_test))
 
 if args.deploy:
     print("[+]Model ready for deployment")
-    joblib.dump(lr, 'logreg_model.pkl')
+    joblib.dump(lr, 'models/logreg_model.pkl')
 
 """
 Performance

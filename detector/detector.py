@@ -10,19 +10,31 @@ from sklearn.tree import DecisionTreeClassifier
 import joblib
 
 
-parser = argparse.ArgumentParser(description='Process a lld')
-parser.add_argument('lld', help='input lld')
-parser.add_argument('--model', help='select trained model')
+parser = argparse.ArgumentParser(description='Process a lld and determin if its benign')
+parser.add_argument('lld', help='input lld strinf')
+parser.add_argument('--model', help='select a trained model')
 args = parser.parse_args()
 lld = args.lld
 model = args.model
 
-print("Implement trained model")
+print("[*] Implementing trained model")
+if args.model == 'dt':
+    ml_model = open('../models/dt_model.pkl','rb')
+elif args.model == 'knn':
+    dt_model = open('../models/knn_model.pkl','rb')
+elif args.model == 'logreg':
+    ml_model = open('../models/logreg_model.pkl','rb')
+elif args.model == 'nb':
+    ml_model = open('../models/nb_model.pkl','rb')
+elif args.model == 'nn':
+    ml_model = open('../models/nn_model.pkl','rb')
+elif args.model == 'rf':
+    ml_model = open('../models/rf_model.pkl','rb')
+elif args.model == 'svm':
+    l_model = open('../models/svm_model.pkl','rb')
 
-dt_model = open('dt_model.pkl','rb')
-dtc = joblib.load(dt_model)
+dtc = joblib.load(ml_model)
 dfa = dict()
-
 """
 Shannon Entropy calulation
 """
@@ -56,4 +68,4 @@ prediction = dtc.predict(df)
 if prediction ==[0]:
     print("This is benign: %s LLD" % lld)
 else:
-    print("This is posible malicious: %s LLD" % lld)
+    print("This is possible malicious: %s LLD" % lld)
