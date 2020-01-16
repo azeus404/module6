@@ -12,13 +12,13 @@ import pydotplus
 import argparse
 import joblib
 
-from sklearn.model_selection import train_test_split,cross_val_score
+from sklearn.model_selection import train_test_split,cross_val_score,validation_curve
 from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score,accuracy_score
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, recall_score
 from sklearn.tree import DecisionTreeClassifier
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
-parser.add_argument('path', help='domainlist')
+parser.add_argument('path', default='lld_lab_dnscat_4features_added.csv',help='domainlist')
 parser.add_argument('--deploy', help='export model for deployment')
 args = parser.parse_args()
 path = args.path
@@ -101,7 +101,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Decision Tree ROC curve')
-plt.savefig('roc_dt.png')
+plt.savefig('img/roc_dt.png')
 plt.show()
 
 
@@ -119,3 +119,40 @@ model_kfold = DecisionTreeClassifier()
 results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
 
 print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))
+
+"""
+    Validation Curve
+    https://machinelearningmastery.com/learning-curves-for-diagnosing-machine-learning-model-performance/
+"""
+
+print("[+] Validation Curve")
+x = df.drop(['label','lld'],axis=1).values
+y = df['label'].values
+
+param_range = np.logspace(-6, -1, 5)
+train_scores, test_scores = validation_curve(
+    DecisionTreeClassifier(), x, y, param_name='gamma', param_range=param_range,
+    scoring="accuracy", n_jobs=1)
+train_scores_mean = np.mean(train_scores, axis=1)
+train_scores_std = np.std(train_scores, axis=1)
+test_scores_mean = np.mean(test_scores, axis=1)
+test_scores_std = np.std(test_scores, axis=1)
+
+plt.title("Validation Curve with SVM")
+plt.xlabel(r"$\gamma$")
+plt.ylabel("Score")
+plt.ylim(0.0, 1.1)
+lw = 2
+plt.semilogx(param_range, train_scores_mean, label="Training score",
+             color="darkorange", lw=lw)
+plt.fill_between(param_range, train_scores_mean - train_scores_std,
+                 train_scores_mean + train_scores_std, alpha=0.2,
+                 color="darkorange", lw=lw)
+plt.semilogx(param_range, test_scores_mean, label="Cross-validation score",
+             color="navy", lw=lw)
+plt.fill_between(param_range, test_scores_mean - test_scores_std,
+                 test_scores_mean + test_scores_std, alpha=0.2,
+                 color="navy", lw=lw)
+plt.legend(loc="best")
+plt.savefig('img/validation_curve_svm.png')
+plt.show()

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 
 import argparse
-import tldextract
+
 
 parser = argparse.ArgumentParser(description='Process labeled lld list')
 parser.add_argument('path', help='location of lld list')
@@ -67,7 +67,7 @@ Number of . in subdomain
 df['numbdots'] = [x.count('.') for x in df['lld']]
 
 """
-Number of character in subdomain
+Number of unique character in subdomain
 """
 df['numunique'] = [len(set(x)) for x in df['lld']]
 
@@ -111,10 +111,10 @@ plt.title("Distribution of DNS domains Malicious vs Benign")
 sns.countplot(df.label)
 plt.show()
 
+plt.figure(figsize=(11,11))
 plt.title("Distribution of DNS domains Malicious vs Benign")
 labels=df["label"].value_counts().index
 sizes=df["label"].value_counts().values
-plt.figure(figsize=(11,11))
 plt.pie(sizes,labels=("Benign","Malicious"),autopct="%1.f%%")
 plt.title("Value counts of label",size=25)
 plt.legend()
@@ -124,8 +124,6 @@ print("Numbers of Value counts\n",df.loc[:,'label'].value_counts())
 """
 Count by label
 """
-sums = df.lld.groupby(df.label).sum()
-print(sums)
 #plt.axis('equal');
 #plt.pie(sums, labels=sums.index);
 #plt.show()

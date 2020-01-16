@@ -121,7 +121,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('k-NN(n_neighbors=3) ROC curve')
-plt.savefig('roc_knn.png')
+plt.savefig('img/roc_knn.png')
 plt.show()
 
 #http://gim.unmc.edu/dxtests/ROC3.htm

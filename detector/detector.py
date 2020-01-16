@@ -13,11 +13,12 @@ import joblib
 parser = argparse.ArgumentParser(description='Process a lld and determin if its benign')
 parser.add_argument('lld', help='input lld strinf')
 parser.add_argument('--model', help='select a trained model')
+parser.add_argument('--features',  type=int, help='select number of freatures')
 args = parser.parse_args()
 lld = args.lld
 model = args.model
 
-print("[*] Implementing trained model")
+
 if args.model == 'dt':
     ml_model = open('../models/dt_model.pkl','rb')
 elif args.model == 'knn':
@@ -31,39 +32,81 @@ elif args.model == 'nn':
 elif args.model == 'rf':
     ml_model = open('../models/rf_model.pkl','rb')
 elif args.model == 'svm':
-    l_model = open('../models/svm_model.pkl','rb')
+    ml_model = open('../models/svm_model.pkl','rb')
 
+print("[*] Implementing trained model: %s" % args.model)
 dtc = joblib.load(ml_model)
+
 dfa = dict()
-"""
-Shannon Entropy calulation
-"""
-def calcEntropy(x):
-    p, lens = Counter(x), np.float(len(x))
-    return -sum( count/lens * np.log2(count/lens) for count in p.values())
 
-dfa['entropy'] = calcEntropy(lld)
+if args.features == 2:
+    """
+    Shannon Entropy calulation
+    """
+    def calcEntropy(x):
+        p, lens = Counter(x), np.float(len(x))
+        return -sum( count/lens * np.log2(count/lens) for count in p.values())
 
-"""
-LLD record length
-"""
-dfa['length'] = len(lld)
+    dfa['entropy'] = calcEntropy(lld)
+
+    """
+    LLD record length
+    """
+    dfa['length'] = len(lld)
 
 
-"""
- Number of different characters
+    """
+     Number of different characters
 
-"""
-def countChar(x):
-    charsum = 0
-    total = len(x)
-    for char in x:
-        if not char.isalpha():
-            charsum = charsum + 1
-    return float(charsum)/total
-dfa['numbchars'] = countChar(lld)
+    """
+    def countChar(x):
+        charsum = 0
+        total = len(x)
+        for char in x:
+            if not char.isalpha():
+                charsum = charsum + 1
+        return float(charsum)/total
+    dfa['numbchars'] = [countChar(x) for x in df['lld']]
+
+elif args.features == 4:
+    """
+    Shannon Entropy calulation
+    """
+    def calcEntropy(x):
+        p, lens = Counter(x), np.float(len(x))
+        return -sum( count/lens * np.log2(count/lens) for count in p.values())
+
+    dfa['entropy'] = calcEntropy(lld)
+
+    """
+    LLD record length
+    """
+    dfa['length'] = len(lld)
+
+    """
+    Number of . in subdomain
+    """
+    dfa['numbdots'] = [x.count('.') for x in lld]
+
+
+    """
+     Number of different characters
+
+    """
+    def countChar(x):
+        charsum = 0
+        total = len(x)
+        for char in x:
+            if not char.isalpha():
+                charsum = charsum + 1
+        return float(charsum)/total
+    dfa['numbchars'] = [countChar(x) for x in lld]
+else:
+    print("[*] no features selected")
+
 
 df = pd.DataFrame(data=dfa,index=[0])
+print(df.head)
 prediction = dtc.predict(df)
 if prediction ==[0]:
     print("This is benign: %s LLD" % lld)

@@ -1,14 +1,13 @@
 
 # Paper MSCE 2019
 
-Applying Machine learning for detection of data exfiltration using DNS protocol.
-
-This method uses lexical features of DNS names to predict if a domain query is benign or malicious.
+We use machine learning algorithms to detect of data exfiltration using DNS protocol.
+This method uses lexical features in domain names to predict if a domain query is benign or malicious.
 
 Used name conventions: LLD = Lower level domain)
 # classification models
 We used models for supervised learning:
-- K-Nearest Neighbor (KNN)
+- K-Nearest K-Nearest neighbor (KNN)
 - Logistic Regression
 - Support Vector Machine (SVM)
 - Naive Bayes
@@ -32,7 +31,7 @@ https://www.kaggle.com/amolbhivarkar/knn-for-classification-using-scikit-learn
 1. Install the requirements pipenv install -r requirements.txt
 start jupyter notebook
 2. Run preprocessing script python ml_datapreprocessing.py lld_lab_data.csv --out lld_lab_features_added.csv
-3. Run the different machine learning model scripts different ml_<model>.py lld_lab_features_added.csv
+3. Run the different machine learning model scripts with python ml_<model>.py lld_lab_features_added.csv
 
 # Features
 we extracted the DNS subdomain form the testdata and derived some features of this string:
@@ -45,14 +44,14 @@ we extracted the DNS subdomain form the testdata and derived some features of th
 We selected these features because tunnel queries are mainly non-human readable of pronounceable.
 
 ## Compare distribution of entropy
-We can compare the distribution of entropy for normal vs Malicious domains via histograms and parametric statistics.
+We can compare the distribution of entropy for benign vs Malicious domains via histograms and parametric statistics.
 
 # Dataset
 we used two full network captures of a lab.
 
 ## Lab data
 We used a mixed dataset created in our lab.
-One used DNScat and the other Iodinde for DNS covert channels supplemented it with benign traffic by running a tool called PartyLoud https://github.com/realtho/PartyLoud to create benign DNS traffic
+One used DNScat and the other Iodine for DNS covert channels supplemented it with benign traffic by running a tool called PartyLoud https://github.com/realtho/PartyLoud to create benign DNS traffic
 
 ## The detector
 We made a proof of concept of the detector python script
