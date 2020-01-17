@@ -66,9 +66,10 @@ if args.features == 2:
             if not char.isalpha():
                 charsum = charsum + 1
         return float(charsum)/total
-    dfa['numbchars'] = [countChar(x) for x in df['lld']]
+    dfa['numbchars'] = [countChar(x) for x in lld]
 
 elif args.features == 4:
+    print()
     """
     Shannon Entropy calulation
     """
@@ -77,7 +78,7 @@ elif args.features == 4:
         return -sum( count/lens * np.log2(count/lens) for count in p.values())
 
     dfa['entropy'] = calcEntropy(lld)
-
+    print(dfa['entropy'])
     """
     LLD record length
     """
@@ -90,7 +91,7 @@ elif args.features == 4:
 
 
     """
-     Number of different characters
+     Number of different characters  in lld
 
     """
     def countChar(x):
@@ -107,7 +108,9 @@ else:
 
 df = pd.DataFrame(data=dfa,index=[0])
 print(df.head)
+
 prediction = dtc.predict(df)
+
 if prediction ==[0]:
     print("This is benign: %s LLD" % lld)
 else:

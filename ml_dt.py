@@ -72,7 +72,24 @@ print("[+]Confusion matrix")
 #confusion_matrix(df.actual_label.values, df.predicted_RF.values)
 print(pd.crosstab(y_test, y_pred, rownames=['Actual'], colnames=['Predicted'], margins=True))
 
-sns.heatmap(pd.crosstab(y_test, y_pred, rownames=['Actual'], colnames=['Predicted'], margins=True),cmap="YlGnBu", annot=True, cbar=False)
+
+#Confusion matrix to file
+cf_matrix = confusion_matrix(y_test, y_pred)
+df_cm = pd.DataFrame(cf_matrix, range(2),
+                  range(2))
+
+# plot (powered by seaborn)
+ax= plt.subplot()
+sns.set(font_scale=1)
+sns.heatmap(df_cm, ax = ax, annot=True,annot_kws={"size": 16}, fmt='g')
+
+# labels, title and ticks
+ax.set_xlabel('Predicted labels')
+ax.set_ylabel('True labels')
+ax.set_title('Confusion Matrix')
+ax.xaxis.set_ticklabels(['negative', 'positive'])
+ax.yaxis.set_ticklabels(['negative', 'positive'])
+plt.savefig('img/cc_dt.png')
 plt.show()
 
 print("[+]classification report")

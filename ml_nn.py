@@ -76,6 +76,26 @@ y_true = y_test
 print("[+]Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
 
+
+#Confusion matrix to file
+cf_matrix = confusion_matrix(y_test, y_pred)
+df_cm = pd.DataFrame(cf_matrix, range(2),
+                  range(2))
+
+# plot (powered by seaborn)
+ax= plt.subplot()
+sns.set(font_scale=1)
+sns.heatmap(df_cm, ax = ax, annot=True,annot_kws={"size": 16}, fmt='g')
+
+# labels, title and ticks
+ax.set_xlabel('Predicted labels')
+ax.set_ylabel('True labels')
+ax.set_title('Confusion Matrix')
+ax.xaxis.set_ticklabels(['negative', 'positive'])
+ax.yaxis.set_ticklabels(['negative', 'positive'])
+plt.savefig('img/nn_dt.png')
+plt.show()
+
 print("[+]classification report")
 target_names = ['Malicious', 'Benign']
 report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
