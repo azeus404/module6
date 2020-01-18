@@ -118,7 +118,7 @@ ax.set_ylabel('True labels')
 ax.set_title('Confusion Matrix')
 ax.xaxis.set_ticklabels(['negative', 'positive'])
 ax.yaxis.set_ticklabels(['negative', 'positive'])
-plt.savefig('img/cc_knn.png')
+plt.savefig('img/cm_knn.png')
 plt.show()
 
 print("[+]classification report")

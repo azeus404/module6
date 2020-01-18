@@ -90,7 +90,7 @@ ax.set_ylabel('True labels')
 ax.set_title('Confusion Matrix')
 ax.xaxis.set_ticklabels(['negative', 'positive'])
 ax.yaxis.set_ticklabels(['negative', 'positive'])
-plt.savefig('img/nb_dt.png')
+plt.savefig('img/cm_nb.png')
 plt.show()
 
 print("[+]classification report")

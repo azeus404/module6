@@ -50,7 +50,7 @@ y = df['label'].values
 #create a test set of size of about 20% of the dataset
 x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42 ,stratify=y)
 
-rt=RandomForestClassifier(n_estimators=35,random_state=1)
+rt=RandomForestClassifier(n_estimators=10,random_state=1)
 rt.fit(x_train,y_train)
 
 print("Accuracy score:",rt.score(x_test,y_test))
@@ -95,7 +95,7 @@ ax.set_ylabel('True labels')
 ax.set_title('Confusion Matrix')
 ax.xaxis.set_ticklabels(['negative', 'positive'])
 ax.yaxis.set_ticklabels(['negative', 'positive'])
-plt.savefig('img/rf_dt.png')
+plt.savefig('img/cm_rf.png')
 plt.show()
 
 print("[+] classification report")

@@ -17,6 +17,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 
 from collections import Counter
 
@@ -32,7 +33,7 @@ args = parser.parse_args()
 path = args.path
 
 """
- Test
+ loading data
 """
 df = pd.read_csv(path, encoding='utf-8')
 df.drop_duplicates(inplace=True)
@@ -91,7 +92,7 @@ models.append(('KNN', KNeighborsClassifier()))
 models.append(('DT', DecisionTreeClassifier()))
 models.append(('NB', GaussianNB()))
 models.append(('SVM', SVC(gamma='auto')))
-
+models.append(('RF', RandomForestClassifier(n_estimators=10)))
 
 #
 x = df.drop(['label','lld'], axis=1)
@@ -99,7 +100,7 @@ y = df['label']
 X_train, X_validation, Y_train, Y_validation = train_test_split(x, y, test_size=0.20, random_state=1)
 
 
-# evaluate each model in turn
+# evaluate each model in turn scored on accuracy = correct predictions/total predictions
 results = []
 names = []
 for name, model in models:
