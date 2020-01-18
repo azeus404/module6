@@ -68,9 +68,9 @@ df['numbdots'] = [x.count('.') for x in df['lld']]
 
 """
 Number of unique character in subdomain
-
-df['numunique'] = [len(set(x)) for x in df['lld']]
 """
+df['numunique'] = [len(set(x)) for x in df['lld']]
+
 
 """
 Metric and statistics of the dataset
@@ -122,16 +122,6 @@ plt.show()
 print("Numbers of Value counts\n",df.loc[:,'label'].value_counts())
 
 """
-Count by label
-"""
-#plt.axis('equal');
-#plt.pie(sums, labels=sums.index);
-#plt.show()
-#plt.pie(sizes, labels = labels, autopct = "%.2f")
-#plt.axes().set_aspect("equal")
-#plt.show()
-
-"""
 Pearson Spearman correlation
 Is there a correlation/linear correlation between domain name length and entropy?
 https://wiki.uva.nl/methodologiewinkel/index.php/Spearman_correlation
@@ -152,7 +142,6 @@ Benign parametric upper
 dfBenign = df[df['label']== 0]
 
 ##DNS exfill
-
 dfMalicious= df[df['label']== 1]
 
 def shadedHist(df,col,bins):
@@ -310,6 +299,8 @@ plt.show()
 
 """
 Export dataset to csv
+
+Number of . in subdomain
 """
 if args.out:
     # Export to csv

@@ -47,6 +47,11 @@ dt=DecisionTreeClassifier()
 x = df.drop(['label','lld'], axis=1)
 y = df['label']
 
+m,n = x.shape[0],y.shape[1]
+pos,neg= (y==1).reshape(m,1), (y==0).reshape(m,1)
+plt.scatter(X[pos[:,0],0],X[pos[:,0],1],c="r",marker="+",s=50)
+plt.scatter(X[neg[:,0],0],X[neg[:,0],1],c="y",marker="o",s=50)
+plt.show()
 # Training set size is 20%
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42, stratify=y,shuffle=True)
 
