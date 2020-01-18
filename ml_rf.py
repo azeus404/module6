@@ -50,10 +50,10 @@ y = df['label'].values
 #create a test set of size of about 20% of the dataset
 x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42 ,stratify=y)
 
-rt=RandomForestClassifier(n_estimators=10,random_state=1)
-rt.fit(x_train,y_train)
+rf=RandomForestClassifier(n_estimators=10,random_state=1)
+rf.fit(x_train,y_train)
 
-print("Accuracy score:",rt.score(x_test,y_test))
+print("Accuracy score:",rf.score(x_test,y_test))
 
 if args.deploy:
     print("[+]Model ready for deployment")
@@ -67,13 +67,13 @@ Feature importance
 # # Rearrange feature names so they match the sorted feature importances
 print("[+] Feature importance")
 headers = ["name", "score"]
-values = sorted(zip(df.columns, rt.feature_importances_), key=lambda x: x[1] * -1)
+values = sorted(zip(df.columns, rf.feature_importances_), key=lambda x: x[1] * -1)
 print(tabulate(values, headers, tablefmt="plain"))
 
 """
 Performance
 """
-y_pred = rt.predict(x_test)
+y_pred = rf.predict(x_test)
 y_true = y_test
 
 print("[+] Confusion matrix")
@@ -105,7 +105,7 @@ print(pd.DataFrame(report).transpose())
 print("True positive rate = Recall")
 
 print("[+] ROC")
-y_pred_proba = rt.predict_proba(x_test)[:,1]
+y_pred_proba = rf.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
 plt.plot([0,1],[0,1],'k-',label='random')

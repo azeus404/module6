@@ -68,9 +68,9 @@ df['numbdots'] = [x.count('.') for x in df['lld']]
 
 """
 Number of unique character in subdomain
-"""
-df['numunique'] = [len(set(x)) for x in df['lld']]
 
+df['numunique'] = [len(set(x)) for x in df['lld']]
+"""
 
 """
 Metric and statistics of the dataset

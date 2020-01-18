@@ -1,10 +1,17 @@
 
 # Paper MSCE 2019
 
-We use machine learning algorithms to detect of data exfiltration using DNS protocol.
-This method uses lexical features in domain names to predict if a domain query is benign or malicious.
+We use supervised machine learning algorithms to detect of data exfiltration using DNS protocol.
+This method uses lexical features in lower level domain names (lld) to predict if a domain query is benign or malicious.
 
-Used name conventions: LLD = Lower level domain)
+# Feature selection
+We used features based on the statistics of the lld:
+- entropy
+- length
+- ratio between characters and numbers in the lld
+
+And validated them based on Lasso and RFE (Feature elimination)
+
 # classification models
 We used models for supervised learning:
 - K-Nearest K-Nearest neighbor (KNN)
@@ -12,11 +19,16 @@ We used models for supervised learning:
 - Support Vector Machine (SVM)
 - Naive Bayes
 - Decision Tree
-- Random Forrest
+- Random Forrest (Ensemble learning)
 - Neural network
 
 # Best performance
-We use:
+We compared the models and used the models with the highs accuracy for the detector.
+
+We selected Random Forrest classifier with accuracy 99.00%
+And because of statememt in related wordk ensamble learning (yassine,2018) give the best results.
+
+
 # https://muthu.co/understanding-the-classification-report-in-sklearn/
 - classification_report
 - confusion_matrix
@@ -29,9 +41,10 @@ https://www.kaggle.com/amolbhivarkar/knn-for-classification-using-scikit-learn
 
 # Setup & run script
 1. Install the requirements pipenv install -r requirements.txt
-start jupyter notebook
-2. Run preprocessing script python ml_datapreprocessing.py lld_lab_data.csv --out lld_lab_features_added.csv
-3. Run the different machine learning model scripts with python ml_<model>.py lld_lab_features_added.csv
+start jupyter lab
+2. extract lld from pcap data
+3. Run preprocessing script python ml_datapreprocessing.py lld_lab_data.csv --out lld_lab_features_added.csv
+4. Run the different machine learning model scripts with python ml_<model>.py lld_lab_features_added.csv
 
 # Features
 we extracted the DNS subdomain form the testdata and derived some features of this string:
