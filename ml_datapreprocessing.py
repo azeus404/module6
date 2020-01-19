@@ -84,11 +84,11 @@ print(df.describe().transpose())
 print('percent of the dataset is malicious %d' % ((len(df.loc[df.label==1])) / (len(df.loc[df.label == 0])) * 100))
 
 print('[*] Entropy values of total dataset')
-print('Minimum length ' + str(df['length'].min()))
-print('Maximum length  ' + str(df['length'].max()))
+print('Minimum length %.2f' %  df['length'].min())
+print('Maximum length  %.2f' % df['length'].max())
 
-print('Minimum Entropy ' + str(df['entropy'].min()))
-print('Maximum Entropy ' + str(df['entropy'].max()))
+print('Minimum Entropy %.2f' % df['entropy'].min())
+print('Maximum Entropy %.2f' % df['entropy'].max())
 
 
 """
@@ -118,6 +118,7 @@ sizes=df["label"].value_counts().values
 plt.pie(sizes,labels=("Benign","Malicious"),autopct="%1.f%%")
 plt.title("Value counts of label",size=25)
 plt.legend()
+plt.savefig('img/distribution_trainingdata.png')
 plt.show()
 print("Numbers of Value counts\n",df.loc[:,'label'].value_counts())
 

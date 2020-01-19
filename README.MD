@@ -1,5 +1,6 @@
 
-# Paper MSCE 2019
+# Detecting C2 over DNS using LLDs
+Paper MSCE 2019
 
 We use supervised machine learning algorithms to detect of data exfiltration using DNS protocol.
 This method uses lexical features in lower level domain names (lld) to predict if a domain query is benign or malicious.
@@ -10,7 +11,8 @@ We used features based on the statistics of the lld:
 - length
 - ratio between characters and numbers in the lld
 
-And validated them based on Lasso and RFE (Feature elimination)
+And validated them based on Lasso and RFE (Feature elimination).
+In this way we remove features to prevent over fitting the model
 
 # classification models
 We used models for supervised learning:
@@ -22,17 +24,23 @@ We used models for supervised learning:
 - Random Forrest (Ensemble learning)
 - Neural network
 
+#preprocessing
+https://machinelearningmastery.com/rescaling-data-for-machine-learning-in-python-with-scikit-learn/
+normalized_X = preprocessing.normalize(X)
+
+
 # Best performance
 We compared the models and used the models with the highs accuracy for the detector.
 
 We selected Random Forrest classifier with accuracy 99.00%
-And because of statememt in related wordk ensamble learning (yassine,2018) give the best results.
+And because of statement in related work, where ensemble learning (yassine,2018) has given the best results.
 
 
 # https://muthu.co/understanding-the-classification-report-in-sklearn/
 - classification_report
 - confusion_matrix
 - ROC/AUC
+- Precision-recall curve is beter of unbalanced datasets
 
 # Related work
 https://www.endgame.com/blog/technical-blog/using-deep-learning-detect-dgas

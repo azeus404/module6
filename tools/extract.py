@@ -2,8 +2,7 @@ import argparse
 import tldextract
 
 """
-Extract domains (LLD) dataset
-tokenization
+Extract domains (LLD) from dataset
 v1
 """
 
