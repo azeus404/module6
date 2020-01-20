@@ -54,41 +54,16 @@ normalized_x = preprocessing.normalize(x)
 #create a test set of size of about 20% of the dataset
 
 x_train,x_test,y_train,y_test = train_test_split(normalized_x ,y,test_size=0.2,random_state=42, stratify=y,shuffle=True)
-neighbors = np.arange(1,9)
-train_accuracy =np.empty(len(neighbors))
-test_accuracy = np.empty(len(neighbors))
 
-for i,k in enumerate(neighbors):
-    #Setup a knn classifier with k neighbors
-    knn = KNeighborsClassifier(n_neighbors=k)
-
-    #Fit the model
-    knn.fit(x_train, y_train)
-
-    #Compute accuracy on the training set
-    train_accuracy[i] = knn.score(x_train, y_train)
-
-    #Compute accuracy on the test set
-    test_accuracy[i] = knn.score(x_test, y_test)
-
+knn = KNeighborsClassifier(n_jobs=-1)
 print(knn.get_params())
-
-"""
-k-NN Acurracy Generate plot
-"""
-plt.title('k-NN Varying number of neighbors')
-plt.plot(neighbors, test_accuracy, label='Testing Accuracy')
-plt.plot(neighbors, train_accuracy, label='Training accuracy')
-plt.legend()
-plt.xlabel('Number of neighbors')
-plt.ylabel('Accuracy')
-plt.show()
-
-
 #Setup a knn classifier with k neighbors
 knn = KNeighborsClassifier()
+
+#train
 knn.fit(x_train,y_train)
 knn.score(x_test,y_test)
+print("Accuracy score: %.2f" % knn.score(x_test,y_test))
 
 print("[+] Applying KNN tuning")
 from sklearn.model_selection import GridSearchCV
