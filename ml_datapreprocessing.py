@@ -73,7 +73,7 @@ df['numunique'] = [len(set(x)) for x in df['lld']]
 
 
 """
-Metric and statistics of the dataset
+Metrics and statistics of the dataset
 """
 data_total = df.shape
 print('%d %d' % (data_total[0], data_total[1]))
@@ -301,7 +301,7 @@ plt.show()
 """
 Export dataset to csv
 
-Number of . in subdomain
+Skip feature: Number of . in subdomain
 """
 if args.out:
     # Export to csv

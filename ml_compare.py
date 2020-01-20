@@ -97,6 +97,7 @@ models.append(('RF', RandomForestClassifier(n_estimators=10)))
 #
 x = df.drop(['label','lld'], axis=1)
 y = df['label']
+# 20% data for testing 
 X_train, X_validation, Y_train, Y_validation = train_test_split(x, y, test_size=0.20, random_state=1)
 
 

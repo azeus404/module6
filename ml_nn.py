@@ -11,9 +11,9 @@ filterwarnings('ignore')
 import argparse
 import joblib
 
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn import preprocessing
 from sklearn.model_selection import train_test_split,cross_val_score
-from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score
+from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score,recall_score
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import KFold
 
@@ -24,6 +24,10 @@ args = parser.parse_args()
 path = args.path
 deploy = args.deploy
 
+
+"""
+    Tuning https://www.geeksforgeeks.org/ml-hyperparameter-tuning/
+"""
 
 """"
 Pre-process data: drop duplicates
@@ -46,22 +50,65 @@ print("[+] Applying Neural Network")
 
 mlp = MLPClassifier(hidden_layer_sizes=(8,8,8), activation='relu', solver='adam', max_iter=500)
 
+print(mlp.get_params())
 
 x = df.drop(['label','lld'],axis=1).values
 y = df['label'].values
 
 #create a test set of size of about 20% of the dataset
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42, stratify=y)
+
+#Standardizing numeric variables.
+scale = preprocessing.StandardScaler()
+scale.fit(x_train)
+x_train = scale.transform(x_train)
+
 mlp.fit(x_train,y_train)
 
 predict_train = mlp.predict(x_train)
 predict_test = mlp.predict(x_test)
 
-print("Accuracy score: %.2f " %mlp.score(x_test,y_test))
+y_pred = mlp.predict(x_test)
+y_true = y_test
+
+print('Recall (TRP) %.2f (1 = best 0 = worse)' % recall_score(y_test, y_pred))
+print("Accuracy score: %.2f" % mlp.score(x_test,y_test))
 
 if args.deploy:
     print("[+] Model ready for deployment")
     joblib.dump(mlp, 'models/nn_model.pkl')
+
+
+print("[+] Applying neural network tuning")
+from sklearn.model_selection import GridSearchCV
+
+# Instantiating
+nn = MLPClassifier()
+# defining parameter range
+param_grid = {
+        'hidden_layer_sizes': [(7, 7), (128,), (128, 7)],
+        'tol': [1e-2, 1e-3, 1e-4, 1e-5, 1e-6],
+        'epsilon': [1e-3, 1e-7, 1e-8, 1e-9, 1e-8]
+    }
+
+grid = GridSearchCV(nn, param_grid, refit = True, verbose = 3)
+
+# fitting the model for grid search
+grid.fit(x_train, y_train)
+print(grid.best_params_)
+print(grid.best_estimator_)
+
+
+grid_predictions = grid.predict(x_test)
+
+# print classification report
+print(classification_report(y_test, grid_predictions))
+
+# Print the tuned parameters and score
+print("Tuned NN Parameters: {}".format(grid.best_params_))
+print("Best score is {}".format(grid.best_score_))
+
+
 
 """
 Performance

@@ -16,7 +16,7 @@ from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.model_selection import KFold
 from sklearn.model_selection import validation_curve
-from sklearn.metrics import classification_report, confusion_matrix,roc_auc_score, roc_curve
+from sklearn.metrics import classification_report, confusion_matrix,roc_auc_score, roc_curve,recall_score
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='path to file with features added to domainlist')
@@ -24,6 +24,10 @@ parser.add_argument('--deploy', help='export model for deployment')
 args = parser.parse_args()
 path = args.path
 deploy = args.deploy
+
+"""
+    tuning https://www.geeksforgeeks.org/svm-hyperparameter-tuning-using-gridsearchcv-ml/
+"""
 
 
 """"
@@ -47,10 +51,10 @@ print("[+] Applying Support Vector Machine")
 
 svm = SVC(random_state = 1,gamma='auto',probability=True )
 
+print(svm.get_params())
+
 x = df.drop(['label','lld'],axis=1).values
 y = df['label'].values
-
-
 
 #preprocessing
 normalized_x = preprocessing.normalize(x)
@@ -60,11 +64,43 @@ x_train,x_test,y_train,y_test = train_test_split(normalized_x,y,test_size=0.2,ra
 
 svm.fit(x_train,y_train)
 
+y_pred = svm.predict(x_test)
+y_true = y_test
+
+print('Recall (TRP) %.2f (1 = best 0 = worse)' % recall_score(y_test, y_pred))
 print("Accuracy score: %.2f" % svm.score(x_test,y_test))
+
 
 if args.deploy:
     print("[+] Model ready for deployment")
     joblib.dump(svm, 'models/svm_model.pkl')
+
+
+print("[+] Applying Support Vector Machine tuning")
+from sklearn.model_selection import GridSearchCV
+
+# defining parameter range
+param_grid = {'C': [0.1, 1, 10, 100, 1000],
+              'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
+              'kernel': ['linear','rbf']}
+
+grid = GridSearchCV(SVC(), param_grid, refit = True, verbose = 3)
+
+# fitting the model for grid search
+grid.fit(x_train, y_train)
+print(grid.best_params_)
+print(grid.best_estimator_)
+
+
+grid_predictions = grid.predict(x_test)
+
+# print classification report
+print(classification_report(y_test, grid_predictions))
+
+# Print the tuned parameters and score
+print("Tuned SVM Parameters: {}".format(grid.best_params_))
+print("Best score is {}".format(grid.best_score_))
+
 
 
 """
@@ -74,8 +110,7 @@ Performance
 - ROC
 - Precision recall curve
 """
-y_pred = svm.predict(x_test)
-y_true = y_test
+
 
 print("[+]Confusion matrix")
 print(pd.crosstab(y_true, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))

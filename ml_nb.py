@@ -14,7 +14,7 @@ import joblib
 from sklearn import preprocessing
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split,cross_val_score
-from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score
+from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score,recall_score
 from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import KFold
 
@@ -56,8 +56,15 @@ standardized_x = preprocessing.scale(x)
 x_train,x_test,y_train,y_test = train_test_split(standardized_x,y,test_size=0.2,random_state=42, stratify=y)
 
 nb = GaussianNB()
+
+print(nb.get_params())
+
 nb.fit(x_train,y_train)
 
+y_pred = nb.predict(x_test)
+y_true = y_test
+
+print('Recall (TRP) %.2f (1 = best 0 = worse)' % recall_score(y_test, y_pred))
 print("Accuracy score: %.2f" % nb.score(x_test,y_test))
 
 
@@ -73,8 +80,6 @@ Performance
 - precision recall curve
 """
 
-y_pred = nb.predict(x_test)
-y_true = y_test
 
 print("[+]Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))

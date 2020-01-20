@@ -71,6 +71,7 @@ for i,k in enumerate(neighbors):
     #Compute accuracy on the test set
     test_accuracy[i] = knn.score(x_test, y_test)
 
+print(knn.get_params())
 
 """
 k-NN Acurracy Generate plot
@@ -88,6 +89,32 @@ plt.show()
 knn = KNeighborsClassifier()
 knn.fit(x_train,y_train)
 knn.score(x_test,y_test)
+
+print("[+] Applying Support Vector Machine tuning")
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {'n_neighbors':[5,6,7,8,9,10],
+          'leaf_size':[1,2,3,5],
+          'weights':['uniform', 'distance'],
+          'algorithm':['auto', 'ball_tree','kd_tree','brute'],
+          'n_jobs':[-1]}
+
+grid = GridSearchCV(KNeighborsClassifier(), param_grid, refit = True, verbose = 3)
+
+# fitting the model for grid search
+grid.fit(x_train, y_train)
+print(grid.best_params_)
+print(grid.best_estimator_)
+
+
+grid_predictions = grid.predict(x_test)
+
+# print classification report
+print(classification_report(y_test, grid_predictions))
+
+# Print the tuned parameters and score
+print("Tuned SVM Parameters: {}".format(grid.best_params_))
+print("Best score is {}".format(grid.best_score_))
 
 if args.deploy:
     print("[+] Model ready for deployment")

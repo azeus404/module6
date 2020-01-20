@@ -45,6 +45,7 @@ Simple Decison Tree
 print("[+] Applying Simple Decison Tree")
 dt=DecisionTreeClassifier()
 
+print(dt.get_params())
 #features, labels
 x = df.drop(['label','lld'], axis=1)
 y = df['label']
@@ -58,6 +59,33 @@ x_train, x_test, y_train, y_test = train_test_split(standardized_x , y, test_siz
 #train
 dt.fit(x_train,y_train)
 print("Accuracy score: %.2f" % dt.score(x_test,y_test))
+
+
+print("[+] Applying DT tuning")
+from sklearn.model_selection import GridSearchCV
+
+# Necessary imports
+from scipy.stats import randint
+from sklearn.model_selection import RandomizedSearchCV
+
+# Creating the hyperparameter grid
+param_dist = {"max_depth": [3, None],
+              "max_features": randint(1, 9),
+              "min_samples_leaf": randint(1, 9),
+              "criterion": ["gini", "entropy"]}
+
+# Instantiating Decision Tree classifier
+tree = DecisionTreeClassifier()
+
+# Instantiating RandomizedSearchCV object
+tree_cv = RandomizedSearchCV(tree, param_dist, cv = 5)
+
+tree_cv.fit(x, y)
+
+# Print the tuned parameters and score
+print("Tuned Decision Tree Parameters: {}".format(tree_cv.best_params_))
+print("Best score is {}".format(tree_cv.best_score_))
+
 
 if args.deploy:
     print("[+] Model ready for deployment")

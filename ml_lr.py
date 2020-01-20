@@ -15,7 +15,7 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import KFold
-from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score,accuracy_score
+from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score,accuracy_score,recall_score
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='path to file with features added to domainlist')
@@ -23,6 +23,11 @@ parser.add_argument('--deploy', help='export model for deployment')
 args = parser.parse_args()
 path = args.path
 deploy = args.deploy
+
+
+"""
+    Tuning https://www.geeksforgeeks.org/ml-hyperparameter-tuning/
+"""
 
 
 
@@ -47,21 +52,49 @@ print("[+] Applying Logistic Regression")
 x = df.drop(['label','lld'],axis=1).values
 y = df['label'].values
 
-# preprocessing
+# preprocessing Standardizing numeric variables.
 standardized_x = preprocessing.scale(x)
 
 #create a test set of size of about 20% of the dataset
 x_train,x_test,y_train,y_test = train_test_split(standardized_x,y,test_size=0.2,random_state=42, stratify=y,shuffle=True)
 
 lr = LogisticRegression(solver='lbfgs')
+
+print(lr.get_params())
 lr.fit(x_train,y_train)
 
+y_pred = lr.predict(x_test)
+y_true = y_test
+
+print('Recall (TRP) %.2f (1 = best 0 = worse)' % recall_score(y_test, y_pred))
 print("Accuracy score: %.2f" % lr.score(x_test,y_test))
 
 
 if args.deploy:
     print("[+] Model ready for deployment")
     joblib.dump(lr, 'models/logreg_model.pkl')
+
+
+print("[+] Applying Logistic Regression tunning")
+# Necessary imports
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
+
+# Creating the hyperparameter grid
+c_space = np.logspace(-5, 8, 15)
+param_grid = {'C': c_space}
+
+# Instantiating logistic regression classifier
+logreg = LogisticRegression()
+
+# Instantiating the GridSearchCV object
+logreg_cv = GridSearchCV(logreg, param_grid, cv = 5)
+
+logreg_cv.fit(x, y)
+
+# Print the tuned parameters and score
+print("Tuned Logistic Regression Parameters: {}".format(logreg_cv.best_params_))
+print("Best score is {}".format(logreg_cv.best_score_))
 
 """
 Performance
@@ -70,10 +103,6 @@ Performance
 - ROC
 - precision recall curve
 """
-
-
-y_pred = lr.predict(x_test)
-y_true = y_test
 
 print("[+]Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
