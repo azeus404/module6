@@ -93,7 +93,7 @@ sns.heatmap(df_cm, ax = ax, annot=True,annot_kws={"size": 16}, fmt='g')
 # labels, title and ticks
 ax.set_xlabel('Predicted labels')
 ax.set_ylabel('True labels')
-ax.set_title('Confusion Matrix')
+ax.set_title('Confusion Matrix - SVM')
 ax.xaxis.set_ticklabels(['negative', 'positive'])
 ax.yaxis.set_ticklabels(['negative', 'positive'])
 plt.savefig('img/cm_svm.png')
