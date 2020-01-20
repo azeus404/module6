@@ -90,7 +90,7 @@ knn = KNeighborsClassifier()
 knn.fit(x_train,y_train)
 knn.score(x_test,y_test)
 
-print("[+] Applying Support Vector Machine tuning")
+print("[+] Applying KNN tuning")
 from sklearn.model_selection import GridSearchCV
 
 param_grid = {'n_neighbors':[5,6,7,8,9,10],
