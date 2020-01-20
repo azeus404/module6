@@ -163,7 +163,7 @@ from sklearn.metrics import f1_score,auc
 # split into train/test sets
 trainX, testX, trainy, testy = train_test_split(normalized_x , y, test_size=0.2, random_state=42)
 # fit a model
-model = KNeighborsClassifier()
+model = KNeighborsClassifier(**grid.best_params_)
 model.fit(trainX, trainy)
 # predict probabilities
 lr_probs = model.predict_proba(testX)
@@ -209,7 +209,7 @@ Cross validation k-fold
 from sklearn.model_selection import KFold
 
 kfold = KFold(n_splits=10, random_state=42)
-model_kfold = KNeighborsClassifier()
+model_kfold = KNeighborsClassifier(**grid.best_params_)
 results_kfold = cross_val_score(model_kfold, normalized_x , y, cv=kfold)
 
 print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))

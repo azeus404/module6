@@ -177,7 +177,7 @@ from sklearn.metrics import f1_score,auc
 # split into train/test sets
 trainX, testX, trainy, testy = train_test_split(x, y, test_size=0.2, random_state=42)
 # fit a model
-model = MLPClassifier()
+model = MLPClassifier(**grid.best_params_)
 model.fit(trainX, trainy)
 # predict probabilities
 lr_probs = model.predict_proba(testX)
@@ -207,7 +207,7 @@ plt.show()
 Cross validation k-fold
 """
 kfold = KFold(n_splits=10, random_state=42)
-model_kfold = MLPClassifier()
+model_kfold = MLPClassifier(**grid.best_params_)
 results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
 
 print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))
