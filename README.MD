@@ -30,9 +30,10 @@ normalized_X = preprocessing.normalize(X)
 
 
 # Hyper parameter Tuning
-We applied hyperparameter tunning.
+We applied hyper parameter tuning.
 
 https://www.kaggle.com/mayu0116/hyper-parameters-tuning-of-dtree-rf-svm-knn
+
 # Best performance
 We compared the models and used the models with the highs accuracy for the detector.
 
