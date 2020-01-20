@@ -8,6 +8,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.decomposition import PCA
 from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.model_selection import train_test_split
 
 import matplotlib.pyplot as plt
 
@@ -67,15 +68,32 @@ XL = df.drop(['label','lld'],axis=1)
 X = df.drop(['label','lld'],axis=1).values
 Y = df['label'].values
 
-print("[*] Feature Selection with Univariate Statistical Tests")
+print("[*] Feature Selection with Univariate Statistical Tests (ANOVA)")
 # Feature Selection with Univariate Statistical Tests
 # feature extraction
 test = SelectKBest(score_func=f_classif, k=3)
+fvalue_selector = SelectKBest(f_classif, k=3)
 fit = test.fit(X, Y)
 # summarize scores
 np.set_printoptions(precision=3)
-print(fit.scores_)
+#print(fit.scores_)
 features = fit.transform(X)
+
+X_kbest = fvalue_selector.fit_transform(X, Y)
+print('Original number of features:', X.shape[1])
+print('Reduced number of features:', X_kbest.shape[1])
+
+# Capture P values in a series
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=101)
+univariate = f_classif(x_train, y_train)
+univariate = pd.Series(univariate[1])
+univariate.index = XL.columns
+univariate.sort_values(ascending=False, inplace=True)
+# Plot the P values
+plt.title('Feature importance - ANOVA')
+univariate.sort_values(ascending=False).plot.bar(figsize=(20,8))
+plt.savefig('../img/feature_anova.png')
+plt.show()
 
 # summarize selected features
 print(features[0:3,:])
@@ -88,7 +106,8 @@ model = LogisticRegression(solver='lbfgs')
 rfe = RFE(model, 3)
 fit = rfe.fit(X, Y)
 
-print("Number Features: %d" % fit.n_features_)
+print('Original number of features:', X.shape[1])
+print("Optimized Number Features: %d" % fit.n_features_)
 print("Selected Features: %s" % fit.support_)
 print("Feature Ranking: %s" % fit.ranking_)
 
@@ -101,46 +120,53 @@ rfc = RandomForestClassifier(random_state=101)
 rfecv = RFECV(estimator=rfc, step=1, cv=StratifiedKFold(10), scoring='accuracy')
 rfecv.fit(X, Y)
 
-print("Number Features: %d" % rfecv.n_features_)
+print('Original number of features:', X.shape[1])
+print("Optimized Number Features: %d" % rfecv.n_features_)
 print("Selected Features: %s" % rfecv.support_)
 print("Feature Ranking: %s" % rfecv.ranking_)
 
-plt.figure(figsize=(16, 9))
+
 plt.title('Recursive Feature Elimination with Cross-Validation', fontsize=18, fontweight='bold', pad=20)
 plt.xlabel('Number of features selected', fontsize=14, labelpad=20)
 plt.ylabel('% Correct Classification', fontsize=14, labelpad=20)
 plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_, color='#303F9F', linewidth=3)
-
+plt.savefig('../img/feature_frecv.png')
 plt.show()
+
 print(np.where(rfecv.support_ == False)[0])
 print("[*] Feature Extraction with PCA")
 # Feature Extraction with PCA
-
-# feature extraction
-pca = PCA(n_components=3)
+pca = PCA(n_components=5)
 fit = pca.fit(X)
 # summarize components
+# print('Original number of features:', X.shape[1])
 print("Explained Variance: %s" % fit.explained_variance_ratio_)
 print(fit.components_)
+
 
 
 print("[*] Feature Importance with Extra Trees Classifier")
 # Feature Importance with Extra Trees Classifier
 # feature extraction
-print('[+] Feature importance')
+
 model = ExtraTreesClassifier(n_estimators=10)
 model.fit(X, Y)
-print(model.feature_importances_)
+print('[+] Feature importance')
+print('Original number of features:', X.shape[1])
+print("Number Features: %d" % model.n_features_)
 
 #plot graph of feature importances for better visualization
-
+plt.figure(figsize=(16, 14))
+plt.title('Feature importance - Extra Trees Classifier')
 feat_importances = pd.Series(model.feature_importances_, index=df.drop(['label','lld'],axis=1).columns.values.tolist())
 feat_importances.nlargest(10).plot(kind='barh')
+plt.savefig('../img/feature_etc.png')
 plt.show()
 
 print('[+] Feature Importance Treesbased Classifier')
 model_tree = RandomForestClassifier(random_state=100, n_estimators=50)
 model_tree.fit(X, Y)
+print(XL.columns.values)
 print(model_tree.feature_importances_)
 
 dset = pd.DataFrame()
@@ -149,8 +175,10 @@ dset['importance'] = model_tree.feature_importances_
 
 dset = dset.sort_values(by='importance', ascending=False)
 
-plt.figure(figsize=(16, 14))
+plt.figure(figsize=(10, 10))
+plt.title('Feature importance - Treesbased Classifier')
 plt.barh(y=dset['attr'], width=dset['importance'], color='#1976D2')
 plt.title('Treesbased Classifier - Feature Importances', fontsize=20, fontweight='bold', pad=20)
 plt.xlabel('Importance', fontsize=14, labelpad=20)
+plt.savefig('../img/feature_tbc.png')
 plt.show()
