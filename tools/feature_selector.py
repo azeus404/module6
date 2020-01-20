@@ -1,3 +1,15 @@
+import pandas as pd
+import numpy as np
+from sklearn.feature_selection import SelectKBest,f_classif
+from sklearn.feature_selection import RFE
+from sklearn.linear_model import LogisticRegression
+from sklearn.feature_selection import RFECV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import StratifiedKFold
+from sklearn.decomposition import PCA
+from sklearn.ensemble import ExtraTreesClassifier
+
+import matplotlib.pyplot as plt
 
 """
 
@@ -26,30 +38,42 @@ Reduces Training Time: Less data means that algorithms train faster.
 
 https://www.datacamp.com/community/tutorials/feature-selection-python
 
+Added Recursive Feature Elimination with Cross-Validation (RFECV)
+https://towardsdatascience.com/feature-selection-in-python-recursive-feature-elimination-19f1c39b8d15
 
 Lassoo
 """
-
-print("[*] Feature Selection with Univariate Statistical Tests")
-# Feature Selection with Univariate Statistical Tests
-import pandas as pd
-from numpy import set_printoptions
-from sklearn.feature_selection import SelectKBest,f_classif
-
-import matplotlib.pyplot as plt
-
+print("[*] Loading data")
 # load data
-df = pd.read_csv('../lld_lab_dnscat_features_added.csv',encoding='utf-8')
+df = pd.read_csv('../TRAININGS_DATA/lld_lab_dnscat_features_added.csv',encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
+
+print("[*] Adding features Feature")
+"""
+Number of . in subdomain
+"""
+df['numbdots'] = [x.count('.') for x in df['lld']]
+
+"""
+Number of unique character in subdomain
+"""
+df['numunique'] = [len(set(x)) for x in df['lld']]
+
+print("[*] Creating traing sets")
+
+XL = df.drop(['label','lld'],axis=1)
+
 X = df.drop(['label','lld'],axis=1).values
 Y = df['label'].values
 
+print("[*] Feature Selection with Univariate Statistical Tests")
+# Feature Selection with Univariate Statistical Tests
 # feature extraction
 test = SelectKBest(score_func=f_classif, k=3)
 fit = test.fit(X, Y)
 # summarize scores
-set_printoptions(precision=3)
+np.set_printoptions(precision=3)
 print(fit.scores_)
 features = fit.transform(X)
 
@@ -58,16 +82,7 @@ print(features[0:3,:])
 
 print("[*] Feature Extraction with RFE")
 # Feature Extraction with RFE
-from sklearn.feature_selection import RFE
-from sklearn.linear_model import LogisticRegression
 
-# load data
-df = pd.read_csv('../lld_lab_dnscat_features_added.csv',encoding='utf-8')
-df.drop_duplicates(inplace=True)
-df.dropna(inplace=True)
-
-X = df.drop(['label','lld'],axis=1).values
-Y = df['label'].values
 # feature extraction
 model = LogisticRegression(solver='lbfgs')
 rfe = RFE(model, 3)
@@ -78,20 +93,29 @@ print("Selected Features: %s" % fit.support_)
 print("Feature Ranking: %s" % fit.ranking_)
 
 
+print("[*] Feature Extraction with RFECV")
+# Feature Extraction with RFE
 
+# feature extraction
+rfc = RandomForestClassifier(random_state=101)
+rfecv = RFECV(estimator=rfc, step=1, cv=StratifiedKFold(10), scoring='accuracy')
+rfecv.fit(X, Y)
 
+print("Number Features: %d" % rfecv.n_features_)
+print("Selected Features: %s" % rfecv.support_)
+print("Feature Ranking: %s" % rfecv.ranking_)
+
+plt.figure(figsize=(16, 9))
+plt.title('Recursive Feature Elimination with Cross-Validation', fontsize=18, fontweight='bold', pad=20)
+plt.xlabel('Number of features selected', fontsize=14, labelpad=20)
+plt.ylabel('% Correct Classification', fontsize=14, labelpad=20)
+plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_, color='#303F9F', linewidth=3)
+
+plt.show()
+print(np.where(rfecv.support_ == False)[0])
 print("[*] Feature Extraction with PCA")
 # Feature Extraction with PCA
-import numpy
-from pandas import read_csv
-from sklearn.decomposition import PCA
-# load data
-df = pd.read_csv('../lld_lab_dnscat_features_added.csv',encoding='utf-8')
-df.drop_duplicates(inplace=True)
-df.dropna(inplace=True)
 
-X = df.drop(['label','lld'],axis=1).values
-Y = df['label'].values
 # feature extraction
 pca = PCA(n_components=3)
 fit = pca.fit(X)
@@ -102,17 +126,6 @@ print(fit.components_)
 
 print("[*] Feature Importance with Extra Trees Classifier")
 # Feature Importance with Extra Trees Classifier
-import pandas as pd
-from sklearn.ensemble import ExtraTreesClassifier
-# load data
-df = pd.read_csv('../lld_lab_dnscat_features_added.csv',encoding='utf-8')
-df.drop_duplicates(inplace=True)
-df.dropna(inplace=True)
-
-X = df.drop(['label','lld'],axis=1).values
-Y = df['label'].values
-
-
 # feature extraction
 print('[+] Feature importance')
 model = ExtraTreesClassifier(n_estimators=10)
@@ -126,12 +139,18 @@ feat_importances.nlargest(10).plot(kind='barh')
 plt.show()
 
 print('[+] Feature Importance Treesbased Classifier')
-from sklearn.ensemble import RandomForestClassifier
 model_tree = RandomForestClassifier(random_state=100, n_estimators=50)
-model_tree.fit(X_train, y_train)
+model_tree.fit(X, Y)
 print(model_tree.feature_importances_)
-sel_model_tree = SelectFromModel(estimator=model_tree, prefit=True, threshold='mean')
-# since we already fit the data, we specify prefit option here
-## Features whose importance is greater or equal to the threshold are kept while the others are discarded.
-X_train_sfm_tree = sel_model_tree.transform(X_train)
-print(sel_model_tree.get_support())
+
+dset = pd.DataFrame()
+dset['attr'] = XL.columns
+dset['importance'] = model_tree.feature_importances_
+
+dset = dset.sort_values(by='importance', ascending=False)
+
+plt.figure(figsize=(16, 14))
+plt.barh(y=dset['attr'], width=dset['importance'], color='#1976D2')
+plt.title('Treesbased Classifier - Feature Importances', fontsize=20, fontweight='bold', pad=20)
+plt.xlabel('Importance', fontsize=14, labelpad=20)
+plt.show()
