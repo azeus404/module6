@@ -25,7 +25,9 @@ args = parser.parse_args()
 path = args.path
 deploy = args.deploy
 
-f = open("scores/nn_scores.txt", "w")
+prefix = path.split('_')[3]
+scorefile = "scores/" + prefix + "_nn_scores.txt"
+f = open(scorefile, "w")
 
 """
     Tuning https://www.geeksforgeeks.org/ml-hyperparameter-tuning/
@@ -80,7 +82,7 @@ print("Untuned accuracy score: %.2f" % model.score(x_test,y_test))
 f.write("Untuned accuracy score: %.2f \n" % model.score(x_test,y_test))
 
 
-print("[+] Applying neural network tuning")
+print("[+] Applying Neural Network tuning")
 from sklearn.model_selection import GridSearchCV
 
 # defining parameter range
@@ -148,10 +150,10 @@ ax.set_ylabel('True labels')
 ax.set_title('Confusion Matrix - NN')
 ax.xaxis.set_ticklabels(['negative', 'positive'])
 ax.yaxis.set_ticklabels(['negative', 'positive'])
-plt.savefig('img/cm_nn.png')
+plt.savefig('img/'+ prefix + '_cm_nn.png')
 plt.show()
 
-print("[+]classification report")
+print("[+] Classification report")
 target_names = ['Malicious', 'Benign']
 report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
 print(pd.DataFrame(report).transpose())
@@ -169,7 +171,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Neural Network ROC curve')
-plt.savefig('img/roc_nn.png')
+plt.savefig('img/'+ prefix + '_roc_nn.png')
 plt.show()
 
 print('Area under the ROC Curve %.2f' % roc_auc_score(y_test,y_pred_proba))
@@ -206,7 +208,7 @@ plt.plot(lr_recall, lr_precision, marker='.', label='MLPClassifier')
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.legend()
-plt.savefig('img/prc_nn.png')
+plt.savefig('img/'+ prefix + '_prc_nn.png')
 plt.show()
 
 

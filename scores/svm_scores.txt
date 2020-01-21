@@ -1,9 +1,0 @@
-Dataset TRAININGS_DATA/lld_lab_tunnel_features_added_1.csv
-Total llds 208 
-Untuned accuracy score: 0.98 
-Tuned parameters {'cv': None, 'error_score': nan, 'estimator__C': 1.0, 'estimator__break_ties': False, 'estimator__cache_size': 200, 'estimator__class_weight': None, 'estimator__coef0': 0.0, 'estimator__decision_function_shape': 'ovr', 'estimator__degree': 3, 'estimator__gamma': 'scale', 'estimator__kernel': 'rbf', 'estimator__max_iter': -1, 'estimator__probability': True, 'estimator__random_state': None, 'estimator__shrinking': True, 'estimator__tol': 0.001, 'estimator__verbose': False, 'estimator': SVC(C=1.0, break_ties=False, cache_size=200, class_weight=None, coef0=0.0,
-    decision_function_shape='ovr', degree=3, gamma='scale', kernel='rbf',
-    max_iter=-1, probability=True, random_state=None, shrinking=True, tol=0.001,
-    verbose=False), 'iid': 'deprecated', 'n_jobs': None, 'param_grid': {'C': [0.1, 1, 10, 100, 1000], 'gamma': [1, 0.1, 0.01, 0.001, 0.0001], 'kernel': ['linear', 'rbf']}, 'pre_dispatch': '2*n_jobs', 'refit': True, 'return_train_score': False, 'scoring': None, 'verbose': 0} 
-Tuned Accuracy score: 95.79 
-Cross validated accuracy: 98.07 

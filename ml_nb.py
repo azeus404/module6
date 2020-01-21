@@ -26,7 +26,9 @@ args = parser.parse_args()
 path = args.path
 deploy = args.deploy
 
-f = open("scores/nb_scores.txt", "w")
+prefix = path.split('_')[3]
+scorefile = "scores/" + prefix + "_nb_scores.txt"
+f = open(scorefile, "w")
 
 """"
 Pre-process data: drop duplicates
@@ -105,7 +107,7 @@ ax.set_ylabel('True labels')
 ax.set_title('Confusion Matrix - NB')
 ax.xaxis.set_ticklabels(['negative', 'positive'])
 ax.yaxis.set_ticklabels(['negative', 'positive'])
-plt.savefig('img/cm_nb.png')
+plt.savefig('img/'+ prefix + '_cm_nb.png')
 plt.show()
 
 print("[+]classification report")
@@ -127,7 +129,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Naive Bayes ROC curve')
-plt.savefig('img/roc_nb.png')
+plt.savefig('img/'+ prefix + '_roc_nb.png')
 plt.show()
 
 #http://gim.unmc.edu/dxtests/ROC3.htm
@@ -164,7 +166,7 @@ plt.plot(lr_recall, lr_precision, marker='.', label='GaussianNB')
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.legend()
-plt.savefig('img/prc_nb.png')
+plt.savefig('img/'+ prefix + '_prc_nb.png')
 plt.show()
 
 """

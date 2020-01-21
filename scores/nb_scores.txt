@@ -1,4 +1,0 @@
-Dataset TRAININGS_DATA/lld_lab_tunnel_features_added_1.csv
-Total llds 208 
-Default parameters {'priors': None, 'var_smoothing': 1e-09} 
-Cross validated accuracy score: 89.95 

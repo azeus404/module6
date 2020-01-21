@@ -26,7 +26,9 @@ path = args.path
 deploy = args.deploy
 
 
-f = open("scores/rf_scores.txt", "w")
+prefix = path.split('_')[3]
+scorefile = "scores/" + prefix + "_rf_scores.txt"
+f = open(scorefile, "w")
 
 """
     Tuning https://www.geeksforgeeks.org/ml-hyperparameter-tuning/
@@ -77,7 +79,7 @@ f.write("Untuned Accuracy score: %.2f \n" % model.score(x_test,y_test))
 
 
 
-print("[+] Applying RF tunning")
+print("[+] Applying RF tuning")
 # Necessary imports
 from scipy.stats import randint
 from sklearn.model_selection import RandomizedSearchCV
@@ -103,7 +105,7 @@ tree_cv.fit(x, y)
 # Print the tuned parameters and score
 print("Tuned Decision Tree Parameters: {}".format(tree_cv.best_params_))
 print("Best score is {}".format(tree_cv.best_score_))
-f.write('Tunned parameters %s \n' % str(tree_cv.get_params()))
+f.write('Tuned parameters %s \n' % str(tree_cv.get_params()))
 f.write("Tuned Accuracy score: %.2f \n" % (tree_cv.best_score_*100.0))
 
 if args.deploy:
@@ -140,7 +142,7 @@ ax.set_ylabel('True labels')
 ax.set_title('Confusion Matrix - RF')
 ax.xaxis.set_ticklabels(['negative', 'positive'])
 ax.yaxis.set_ticklabels(['negative', 'positive'])
-plt.savefig('img/cm_rf.png')
+plt.savefig('img/'+ prefix + '_cm_rf.png')
 plt.show()
 
 print("[+] classification report")
@@ -160,7 +162,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Random Forest ROC curve')
-plt.savefig('img/roc_rf.png')
+plt.savefig('img/'+ prefix + '_roc_rf.png')
 plt.show()
 
 #http://gim.unmc.edu/dxtests/ROC3.htm
@@ -198,7 +200,7 @@ plt.plot(lr_recall, lr_precision, marker='.', label='RandomForestClassifier')
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.legend()
-plt.savefig('img/prc_rf.png')
+plt.savefig('img/'+ prefix + '_prc_rf.png')
 plt.show()
 """
 Cross validation k-fold

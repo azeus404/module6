@@ -24,7 +24,9 @@ args = parser.parse_args()
 path = args.path
 deploy = args.deploy
 
-f = open("scores/dt_scores.txt", "w")
+prefix = path.split('_')[3]
+scorefile = "scores/" + prefix + "_dt_scores.txt"
+f = open(scorefile, "w")
 
 """
     tuning https://www.geeksforgeeks.org/svm-hyperparameter-tuning-using-gridsearchcv-ml/
@@ -132,7 +134,7 @@ ax.set_ylabel('True labels')
 ax.set_title('Confusion Matrix - DT')
 ax.xaxis.set_ticklabels(['negative', 'positive'])
 ax.yaxis.set_ticklabels(['negative', 'positive'])
-plt.savefig('img/cm_dt.png')
+plt.savefig('img/'+prefix+'_cm_dt.png')
 plt.show()
 
 print("[+]classification report")
@@ -161,7 +163,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Decision Tree ROC curve')
-plt.savefig('img/roc_dt.png')
+plt.savefig('img/'+prefix+'_roc_dt.png')
 plt.show()
 
 
@@ -200,7 +202,7 @@ plt.plot(lr_recall, lr_precision, marker='.', label='Decision Tree Classifier')
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.legend()
-plt.savefig('img/prc_dt.png')
+plt.savefig('img/'+prefix+'_prc_dt.png')
 plt.show()
 
 

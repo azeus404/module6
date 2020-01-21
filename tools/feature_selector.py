@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import argparse
+
 from sklearn.feature_selection import SelectKBest,f_classif
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LogisticRegression
@@ -16,37 +18,44 @@ import matplotlib.pyplot as plt
 
 https://towardsdatascience.com/a-feature-selection-tool-for-machine-learning-in-python-b64dd23710f0
 https://machinelearningmastery.com/an-introduction-to-feature-selection/
-There are five methods used to identify features to remove:
 https://machinelearningmastery.com/an-introduction-to-feature-selection/
-
-Missing Values
-Single Unique Values
-Collinear Features
-Zero Importance Features
-Low Importance Features
+There are five methods used to identify features to remove:
+- Missing Values
+- Single Unique Values
+- Collinear Features
+- Zero Importance Features
+- Low Importance Features
 
 In this script:
-Univariate Selection.
-Recursive Feature Elimination.
-Principle Component Analysis.
-Feature Importance.
+- Univariate Selection (ANOVA).
+- Recursive Feature Elimination.
+- Principle Component Analysis.
+
 
 Three benefits of performing feature selection before modeling your data are:
 
-Reduces Overfitting: Less redundant data means less opportunity to make decisions based on noise.
-Improves Accuracy: Less misleading data means modeling accuracy improves.
-Reduces Training Time: Less data means that algorithms train faster.
+1.Reduces Overfitting: Less redundant data means less opportunity to make decisions based on noise.
+2.Improves Accuracy: Less misleading data means modeling accuracy improves.
+3, Reduces Training Time: Less data means that algorithms train faster.
 
 https://www.datacamp.com/community/tutorials/feature-selection-python
 
 Added Recursive Feature Elimination with Cross-Validation (RFECV)
 https://towardsdatascience.com/feature-selection-in-python-recursive-feature-elimination-19f1c39b8d15
 
-Lassoo
 """
 print("[*] Loading data")
 # load data
-df = pd.read_csv('../TRAININGS_DATA/lld_lab_dnscat_features_added.csv',encoding='utf-8')
+parser = argparse.ArgumentParser(description='Process features')
+parser.add_argument('path', help='lld with features added')
+
+
+args = parser.parse_args()
+path = args.path
+prefix = path.split('_')[3]
+#df = pd.read_csv('../TRAININGS_DATA/lld_lab_tunnel_features_added.csv',encoding='utf-8')
+
+df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 
@@ -92,7 +101,7 @@ univariate.sort_values(ascending=False, inplace=True)
 # Plot the P values
 plt.title('Feature importance - ANOVA')
 univariate.sort_values(ascending=False).plot.bar(figsize=(20,8))
-plt.savefig('../img/feature_anova.png')
+plt.savefig('../img/'+prefix+'_feature_anova.png')
 plt.show()
 
 # summarize selected features
@@ -113,7 +122,7 @@ print("Feature Ranking: %s" % fit.ranking_)
 
 
 print("[*] Feature Extraction with RFECV")
-# Feature Extraction with RFE
+# Feature Extraction with RFECV
 
 # feature extraction
 rfc = RandomForestClassifier(random_state=101)
@@ -130,7 +139,7 @@ plt.title('Recursive Feature Elimination with Cross-Validation', fontsize=18, fo
 plt.xlabel('Number of features selected', fontsize=14, labelpad=20)
 plt.ylabel('% Correct Classification', fontsize=14, labelpad=20)
 plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_, color='#303F9F', linewidth=3)
-plt.savefig('../img/feature_frecv.png')
+plt.savefig('../img/'+prefix+'_feature_frecv.png')
 plt.show()
 
 print(np.where(rfecv.support_ == False)[0])
@@ -160,7 +169,7 @@ plt.figure(figsize=(16, 14))
 plt.title('Feature importance - Extra Trees Classifier')
 feat_importances = pd.Series(model.feature_importances_, index=df.drop(['label','lld'],axis=1).columns.values.tolist())
 feat_importances.nlargest(10).plot(kind='barh')
-plt.savefig('../img/feature_etc.png')
+plt.savefig('../img/'+prefix+'_feature_etc.png')
 plt.show()
 
 print('[+] Feature Importance Treesbased Classifier')
@@ -180,5 +189,5 @@ plt.title('Feature importance - Treesbased Classifier')
 plt.barh(y=dset['attr'], width=dset['importance'], color='#1976D2')
 plt.title('Treesbased Classifier - Feature Importances', fontsize=20, fontweight='bold', pad=20)
 plt.xlabel('Importance', fontsize=14, labelpad=20)
-plt.savefig('../img/feature_tbc.png')
+plt.savefig('../img/'+prefix+'_feature_tbc.png')
 plt.show()

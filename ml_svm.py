@@ -27,7 +27,9 @@ args = parser.parse_args()
 path = args.path
 deploy = args.deploy
 
-f = open("scores/svm_scores.txt", "w")
+prefix = path.split('_')[3]
+scorefile = "scores/" + prefix + "_svm_scores.txt"
+f = open(scorefile, "w")
 
 """
     tuning https://www.geeksforgeeks.org/svm-hyperparameter-tuning-using-gridsearchcv-ml/
@@ -113,7 +115,7 @@ if args.deploy:
     print("[+] Model ready for deployment")
     model = SVC(**grid.best_params_,probability=True)
     model.fit(x_train,y_train)
-    joblib.dump(model, 'models/rf_model.pkl')
+    joblib.dump(model, 'models/svm_model.pkl')
 
 """
 Performance
@@ -143,7 +145,7 @@ ax.set_ylabel('True labels')
 ax.set_title('Confusion Matrix - SVM')
 ax.xaxis.set_ticklabels(['negative', 'positive'])
 ax.yaxis.set_ticklabels(['negative', 'positive'])
-plt.savefig('img/cm_svm.png')
+plt.savefig('img/'+ prefix + '_cm_svm.png')
 plt.show()
 
 print("[+]classification report")
@@ -166,7 +168,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Support Vector machine ROC curve')
-plt.savefig('img/roc_svm.png')
+plt.savefig('img/'+ prefix + '_roc_svm.png')
 plt.show()
 print('Area under the ROC Curve %.2f' % roc_auc_score(y_test,y_pred_proba))
 #http://gim.unmc.edu/dxtests/ROC3.htm
@@ -252,5 +254,5 @@ plt.fill_between(param_range, test_scores_mean - test_scores_std,
                  test_scores_mean + test_scores_std, alpha=0.2,
                  color="navy", lw=lw)
 plt.legend(loc="best")
-plt.savefig('img/validation_curve_svm.png')
+plt.savefig('img//'+ prefix + '_validation_curve_svm.png')
 plt.show()

@@ -24,7 +24,9 @@ args = parser.parse_args()
 path = args.path
 deploy = args.deploy
 
-f = open("scores/knn_scores.txt", "w")
+prefix = path.split('_')[3]
+scorefile = "scores/" + prefix + "_knn_scores.txt"
+f = open(scorefile, "w")
 
 """"
 Pre-process data: drop duplicates
@@ -141,10 +143,10 @@ ax.set_ylabel('True labels')
 ax.set_title('Confusion Matrix - K-NN')
 ax.xaxis.set_ticklabels(['negative', 'positive'])
 ax.yaxis.set_ticklabels(['negative', 'positive'])
-plt.savefig('img/cm_knn.png')
+plt.savefig('img/'+ prefix + '_cm_knn.png')
 plt.show()
 
-print("[+]classification report")
+print("[+] Classification report")
 target_names = ['Malicious', 'Benign']
 report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
 print(pd.DataFrame(report).transpose())
@@ -163,7 +165,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('k-NN(n_neighbors= %d ) ROC curve' % grid.best_params_['n_neighbors'])
-plt.savefig('img/roc_knn.png')
+plt.savefig('img/'+ prefix + '_roc_knn.png')
 plt.show()
 
 #http://gim.unmc.edu/dxtests/ROC3.htm
@@ -200,7 +202,7 @@ plt.plot(lr_recall, lr_precision, marker='.', label='KNeighbors')
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.legend()
-plt.savefig('img/prc_knn.png')
+plt.savefig('img/'+ prefix + '_prc_knn.png')
 plt.show()
 
 

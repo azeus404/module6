@@ -25,8 +25,10 @@ args = parser.parse_args()
 path = args.path
 deploy = args.deploy
 
+prefix = path.split('_')[3]
+scorefile = "scores/" + prefix + "_lr_scores.txt"
+f = open(scorefile, "w")
 
-f = open("scores/lr_scores.txt", "w")
 
 
 """
@@ -144,7 +146,7 @@ ax.set_ylabel('True labels')
 ax.set_title('Confusion Matrix - LR')
 ax.xaxis.set_ticklabels(['negative', 'positive'])
 ax.yaxis.set_ticklabels(['negative', 'positive'])
-plt.savefig('img/cm_lr.png')
+plt.savefig('img/'+ prefix + '_cm_lr.png')
 plt.show()
 
 print("[+] Tuned classification report")
@@ -165,7 +167,7 @@ plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
 plt.title('Logistic Regression ROC curve')
-plt.savefig('img/roc_lr.png')
+plt.savefig('img/'+ prefix + '_roc_lr.png')
 plt.show()
 
 #http://gim.unmc.edu/dxtests/ROC3.htm
@@ -202,7 +204,7 @@ plt.plot(lr_recall, lr_precision, marker='.', label='LogisticRegression')
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.legend()
-plt.savefig('img/prc_lr.png')
+plt.savefig('img/'+ prefix + '_prc_lr.png')
 plt.show()
 
 """
