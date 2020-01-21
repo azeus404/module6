@@ -1,4 +1,4 @@
-Dataset TRAININGS_DATA/lld_lab_dnscat_features_added.csv
-Total llds 205 
+Dataset TRAININGS_DATA/lld_lab_tunnel_features_added_1.csv
+Total llds 208 
 Default parameters {'priors': None, 'var_smoothing': 1e-09} 
-Cross validated accuracy score: 99.00 
+Cross validated accuracy score: 89.95 
