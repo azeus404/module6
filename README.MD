@@ -38,9 +38,19 @@ https://www.kaggle.com/mayu0116/hyper-parameters-tuning-of-dtree-rf-svm-knn
 The scores of the the tuned models is recored in /scores directory.
 
 # Best performance
-We compared the models and used the models with the highs accuracy for the detector.
+We scored the models on the validated accuracy scores:
+1. knn_scores.txt:Cross validated accuracy: 99.02
+2. dt_scores.txt:Cross validated accuracy: 99.00
+3. svm_scores.txt:Cross validated accuracy: 99.00
+4. lr_scores.txt:Cross validated accuracy: 98.52
+5. nn_scores.txt:Cross validated accuracy: 91.67
+6. rf_scores.txt:Cross validated accuracy: 98.52
 
-We selected Random Forrest classifier with accuracy 99.00%
+
+The models with the highest accuracy was used for the detector.
+
+We selected KNN with accuracy 99.02%
+
 And because of statement in related work, where ensemble learning (yassine,2018) has given the best results.
 
 
