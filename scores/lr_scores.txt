@@ -1,0 +1,13 @@
+Dataset TRAININGS_DATA/lld_lab_dnscat_features_added.csv
+Total llds 205 
+Untuned accuracy score: 1.00 
+Tuned parameters {'cv': 5, 'error_score': nan, 'estimator__C': 1.0, 'estimator__class_weight': None, 'estimator__dual': False, 'estimator__fit_intercept': True, 'estimator__intercept_scaling': 1, 'estimator__l1_ratio': None, 'estimator__max_iter': 100, 'estimator__multi_class': 'auto', 'estimator__n_jobs': None, 'estimator__penalty': 'l2', 'estimator__random_state': None, 'estimator__solver': 'lbfgs', 'estimator__tol': 0.0001, 'estimator__verbose': 0, 'estimator__warm_start': False, 'estimator': LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
+                   intercept_scaling=1, l1_ratio=None, max_iter=100,
+                   multi_class='auto', n_jobs=None, penalty='l2',
+                   random_state=None, solver='lbfgs', tol=0.0001, verbose=0,
+                   warm_start=False), 'iid': 'deprecated', 'n_jobs': None, 'param_grid': {'C': array([1.00000000e-05, 8.48342898e-05, 7.19685673e-04, 6.10540230e-03,
+       5.17947468e-02, 4.39397056e-01, 3.72759372e+00, 3.16227766e+01,
+       2.68269580e+02, 2.27584593e+03, 1.93069773e+04, 1.63789371e+05,
+       1.38949549e+06, 1.17876863e+07, 1.00000000e+08])}, 'pre_dispatch': '2*n_jobs', 'refit': True, 'return_train_score': False, 'scoring': None, 'verbose': 0} 
+Tuned Accuracy score: 98.77 
+Cross validated accuracy: 98.52 

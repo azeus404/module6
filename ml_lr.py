@@ -16,6 +16,7 @@ from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import KFold
 from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score,accuracy_score,recall_score
+from sklearn.utils import shuffle
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='path to file with features added to domainlist')
@@ -23,6 +24,9 @@ parser.add_argument('--deploy', help='export model for deployment')
 args = parser.parse_args()
 path = args.path
 deploy = args.deploy
+
+
+f = open("scores/lr_scores.txt", "w")
 
 
 """
@@ -37,6 +41,8 @@ Pre-process data: drop duplicates
 df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
+df = shuffle(df).reset_index(drop=True)
+f.write('Dataset %s\n' % path)
 
 """
 Properties of the dataset
@@ -44,6 +50,7 @@ Properties of the dataset
 print("[+] Properties of the dataset")
 data_total = df.shape
 print('Total llds %d' % df.shape[0])
+f.write('Total llds %d \n' % data_total[0])
 
 """
 Logistic Regression
@@ -58,24 +65,26 @@ standardized_x = preprocessing.scale(x)
 #create a test set of size of about 20% of the dataset
 x_train,x_test,y_train,y_test = train_test_split(standardized_x,y,test_size=0.2,random_state=42, stratify=y,shuffle=True)
 
-lr = LogisticRegression(solver='lbfgs')
+model = LogisticRegression()
 
-print(lr.get_params())
-lr.fit(x_train,y_train)
 
-y_pred = lr.predict(x_test)
+model.fit(x_train,y_train)
+
+y_pred = model.predict(x_test)
 y_true = y_test
 
+# print classification report
+print("[+] Untuned classification report")
+target_names = ['Malicious', 'Benign']
+report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
+print(pd.DataFrame(report).transpose())
+print("True positive rate = Recall")
+
 print('Recall (TRP) %.2f (1 = best 0 = worse)' % recall_score(y_test, y_pred))
-print("Accuracy score: %.2f" % lr.score(x_test,y_test))
+print("Untuned Accuracy score: %.2f" % model.score(x_test,y_test))
+f.write("Untuned accuracy score: %.2f \n" % model.score(x_test,y_test))
 
-
-if args.deploy:
-    print("[+] Model ready for deployment")
-    joblib.dump(lr, 'models/logreg_model.pkl')
-
-
-print("[+] Applying Logistic Regression tunning")
+print("[+] Applying Logistic Regression tuning")
 # Necessary imports
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
@@ -84,17 +93,29 @@ from sklearn.model_selection import GridSearchCV
 c_space = np.logspace(-5, 8, 15)
 param_grid = {'C': c_space}
 
-# Instantiating logistic regression classifier
-logreg = LogisticRegression()
 
-# Instantiating the GridSearchCV object
-logreg_cv = GridSearchCV(logreg, param_grid, cv = 5)
+grid = GridSearchCV(LogisticRegression(), param_grid, cv = 5)
 
-logreg_cv.fit(x, y)
+# fitting the model for grid search
+grid.fit(x_train, y_train)
+print(grid.best_params_)
+print(grid.best_estimator_)
+
+grid_predictions = grid.predict(x_test)
 
 # Print the tuned parameters and score
-print("Tuned Logistic Regression Parameters: {}".format(logreg_cv.best_params_))
-print("Best score is {}".format(logreg_cv.best_score_))
+print("Tuned Logistic Regression Parameters: {}".format(grid.best_params_))
+print("Best score is {}".format(grid.best_score_))
+
+f.write('Tuned parameters %s \n' % str(grid.get_params()))
+f.write("Tuned Accuracy score: %.2f \n" % (grid.best_score_*100.0))
+
+if args.deploy:
+    print("[+] Model ready for deployment")
+    model = LogisticRegression(**grid.best_params_)
+    model.fit(x_train,y_train)
+    joblib.dump(model, 'models/lr_model.pkl')
+
 
 """
 Performance
@@ -104,7 +125,7 @@ Performance
 - precision recall curve
 """
 
-print("[+]Confusion matrix")
+print("[+] Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
 
 #Confusion matrix to file
@@ -126,14 +147,14 @@ ax.yaxis.set_ticklabels(['negative', 'positive'])
 plt.savefig('img/cm_lr.png')
 plt.show()
 
-print("[+]classification report")
+print("[+] Tuned classification report")
 target_names = ['Malicious', 'Benign']
 report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
 print(pd.DataFrame(report).transpose())
 print("True positive rate = Recall")
 
 print("[+] ROC")
-y_pred_proba = lr.predict_proba(x_test)[:,1]
+y_pred_proba = model.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
 
@@ -159,7 +180,7 @@ from sklearn.metrics import f1_score,auc
 # split into train/test sets
 trainX, testX, trainy, testy = train_test_split(standardized_x, y, test_size=0.2, random_state=42)
 # fit a model
-model = LogisticRegression(**logreg_cv.best_params_)
+model = LogisticRegression(**grid.best_params_)
 model.fit(trainX, trainy)
 # predict probabilities
 lr_probs = model.predict_proba(testX)
@@ -189,7 +210,9 @@ Cross validation k-fold
 """
 
 kfold = KFold(n_splits=10, random_state=42)
-model_kfold = LogisticRegression(**logreg_cv.best_params_)
+model_kfold = LogisticRegression(**grid.best_params_)
 results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
 
-print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))
+print("Cross validated accuracy: %.2f%%" % (results_kfold.mean()*100.0))
+f.write("Cross validated accuracy: %.2f \n" % (results_kfold.mean()*100.0))
+f.close()

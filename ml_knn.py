@@ -15,6 +15,7 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.utils import shuffle
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='path to file with features added to domainlist')
@@ -23,12 +24,16 @@ args = parser.parse_args()
 path = args.path
 deploy = args.deploy
 
+f = open("scores/knn_scores.txt", "w")
+
 """"
 Pre-process data: drop duplicates
 """
 df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
+df = shuffle(df).reset_index(drop=True)
+f.write('Dataset %s\n' % path)
 
 """
 Properties of the dataset
@@ -36,11 +41,11 @@ Properties of the dataset
 print("[+] Properties of the dataset")
 data_total = df.shape
 print('Total llds %d' % df.shape[0])
-
+f.write('Total llds %d \n' % data_total[0])
 
 
 """
-KNN
+K-NN
 """
 
 print("[+] Applying K-NN")
@@ -55,17 +60,27 @@ normalized_x = preprocessing.normalize(x)
 
 x_train,x_test,y_train,y_test = train_test_split(normalized_x ,y,test_size=0.2,random_state=42, stratify=y,shuffle=True)
 
-knn = KNeighborsClassifier(n_jobs=-1)
-print(knn.get_params())
 #Setup a knn classifier with k neighbors
-knn = KNeighborsClassifier()
+model = KNeighborsClassifier()
 
 #train
-knn.fit(x_train,y_train)
-knn.score(x_test,y_test)
-print("Accuracy score: %.2f" % knn.score(x_test,y_test))
+model.fit(x_train,y_train)
 
-print("[+] Applying KNN tuning")
+
+y_pred = model.predict(x_test)
+y_true = y_test
+
+# print classification report
+print("[+] Untuned classification report")
+target_names = ['Malicious', 'Benign']
+report = classification_report(y_test, y_pred,target_names=target_names,output_dict=True)
+print(pd.DataFrame(report).transpose())
+print("True positive rate = Recall")
+
+print("Untuned accuracy score: %.2f" % model.score(x_test,y_test))
+f.write("Untuned accuracy score: %.2f \n" % model.score(x_test,y_test))
+
+print("[+] Applying K-NN tuning")
 from sklearn.model_selection import GridSearchCV
 
 param_grid = {'n_neighbors':[5,6,7,8,9,10],
@@ -74,7 +89,7 @@ param_grid = {'n_neighbors':[5,6,7,8,9,10],
           'algorithm':['auto', 'ball_tree','kd_tree','brute'],
           'n_jobs':[-1]}
 
-grid = GridSearchCV(KNeighborsClassifier(), param_grid, refit = True, verbose = 3)
+grid = GridSearchCV(model, param_grid, refit = True)
 
 # fitting the model for grid search
 grid.fit(x_train, y_train)
@@ -84,18 +99,18 @@ print(grid.best_estimator_)
 
 grid_predictions = grid.predict(x_test)
 
-# print classification report
-print(classification_report(y_test, grid_predictions))
-
 # Print the tuned parameters and score
-print("Tuned SVM Parameters: {}".format(grid.best_params_))
+print("Tuned K-NN Parameters: {}".format(grid.best_params_))
 print("Best score is {}".format(grid.best_score_))
+f.write('Tuned parameters %s \n' % str(grid.get_params()))
+f.write("Tuned accuracy score: %.2f \n" % (grid.best_score_*100.0))
+
 
 if args.deploy:
     print("[+] Model ready for deployment")
-    joblib.dump(knn, 'models/knn_model.pkl')
-
-
+    model = KNeighborsClassifier(**grid.best_params_)
+    model.fit(x_train,y_train)
+    joblib.dump(model, 'models/knn_model.pkl')
 
 """
 Performance
@@ -105,9 +120,9 @@ Performance
 - precision recall curve
 """
 
-y_pred = knn.predict(x_test)
+y_pred = model.predict(x_test)
 
-print("[+]Confusion matrix")
+print("[+] Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
 
 #Confusion matrix to file
@@ -123,7 +138,7 @@ sns.heatmap(df_cm, ax = ax, annot=True,annot_kws={"size": 16}, fmt='g')
 # labels, title and ticks
 ax.set_xlabel('Predicted labels')
 ax.set_ylabel('True labels')
-ax.set_title('Confusion Matrix - KNN')
+ax.set_title('Confusion Matrix - K-NN')
 ax.xaxis.set_ticklabels(['negative', 'positive'])
 ax.yaxis.set_ticklabels(['negative', 'positive'])
 plt.savefig('img/cm_knn.png')
@@ -136,7 +151,7 @@ print(pd.DataFrame(report).transpose())
 print("True positive rate = Recall")
 
 print("[+] ROC")
-y_pred_proba = knn.predict_proba(x_test)[:,1]
+y_pred_proba = model.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
 
@@ -147,7 +162,7 @@ plt.plot(fpr,tpr, label='K-Neighbors Classifier')
 plt.legend()
 plt.xlabel('False Positive Rate - FPR')
 plt.ylabel('True Positive Rate - TPR')
-plt.title('k-NN(n_neighbors=3) ROC curve')
+plt.title('k-NN(n_neighbors= %d ) ROC curve' % grid.best_params_['n_neighbors'])
 plt.savefig('img/roc_knn.png')
 plt.show()
 
@@ -190,20 +205,6 @@ plt.show()
 
 
 """
-Cross validation
-"""
-from sklearn.model_selection import GridSearchCV
-param_grid = {'n_neighbors':np.arange(1,50)}
-knn = KNeighborsClassifier()
-knn_cv= GridSearchCV(knn,param_grid,cv=5)
-knn_cv.fit(x,y)
-
-print("Best score %.2f" % knn_cv.best_score_)
-print(knn_cv.best_params_)
-
-
-
-"""
 Cross validation k-fold
 """
 from sklearn.model_selection import KFold
@@ -212,4 +213,6 @@ kfold = KFold(n_splits=10, random_state=42)
 model_kfold = KNeighborsClassifier(**grid.best_params_)
 results_kfold = cross_val_score(model_kfold, normalized_x , y, cv=kfold)
 
-print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))
+print("Cross validated accuracy: %.2f%%" % (results_kfold.mean()*100.0))
+f.write("Cross validated accuracy: %.2f \n" % (results_kfold.mean()*100.0))
+f.close()

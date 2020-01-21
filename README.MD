@@ -26,13 +26,16 @@ We used models for supervised learning:
 
 #preprocessing
 https://machinelearningmastery.com/rescaling-data-for-machine-learning-in-python-with-scikit-learn/
-normalized_X = preprocessing.normalize(X)
+We applied different methods for rescaling the dataset:
 
+We shuffled the trainings data to prevent overfitting.
 
 # Hyper parameter Tuning
 We applied hyper parameter tuning.
 
 https://www.kaggle.com/mayu0116/hyper-parameters-tuning-of-dtree-rf-svm-knn
+
+The scores of the the tuned models is recored in /scores directory.
 
 # Best performance
 We compared the models and used the models with the highs accuracy for the detector.
@@ -45,7 +48,7 @@ And because of statement in related work, where ensemble learning (yassine,2018)
 - classification_report
 - confusion_matrix
 - ROC/AUC
-- Precision-recall curve is beter of unbalanced datasets
+- Precision-recall curve is better of unbalanced datasets
 
 # Related work
 https://www.endgame.com/blog/technical-blog/using-deep-learning-detect-dgas

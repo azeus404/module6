@@ -1,0 +1,8 @@
+Dataset TRAININGS_DATA/lld_lab_dnscat_features_added.csv
+Total llds 205 
+Untuned accuracy score: 0.98 
+Tuned parameters {'cv': None, 'error_score': nan, 'estimator__algorithm': 'auto', 'estimator__leaf_size': 30, 'estimator__metric': 'minkowski', 'estimator__metric_params': None, 'estimator__n_jobs': None, 'estimator__n_neighbors': 5, 'estimator__p': 2, 'estimator__weights': 'uniform', 'estimator': KNeighborsClassifier(algorithm='auto', leaf_size=30, metric='minkowski',
+                     metric_params=None, n_jobs=None, n_neighbors=5, p=2,
+                     weights='uniform'), 'iid': 'deprecated', 'n_jobs': None, 'param_grid': {'n_neighbors': [5, 6, 7, 8, 9, 10], 'leaf_size': [1, 2, 3, 5], 'weights': ['uniform', 'distance'], 'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute'], 'n_jobs': [-1]}, 'pre_dispatch': '2*n_jobs', 'refit': True, 'return_train_score': False, 'scoring': None, 'verbose': 0} 
+Tuned accuracy score: 98.79 
+Cross validated accuracy: 99.02 

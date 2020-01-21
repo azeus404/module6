@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score,recall_score
 from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import KFold
-
+from sklearn.utils import shuffle
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='path to file with features added to domainlist')
@@ -26,6 +26,7 @@ args = parser.parse_args()
 path = args.path
 deploy = args.deploy
 
+f = open("scores/nb_scores.txt", "w")
 
 """"
 Pre-process data: drop duplicates
@@ -33,6 +34,8 @@ Pre-process data: drop duplicates
 df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
+df = shuffle(df).reset_index(drop=True)
+f.write('Dataset %s\n' % path)
 
 """
 Properties of the dataset
@@ -40,6 +43,7 @@ Properties of the dataset
 print("[+] Properties of the dataset")
 data_total = df.shape
 print('Total llds %d' % df.shape[0])
+f.write('Total llds %d \n' % data_total[0])
 
 """
 Naive Bayes
@@ -55,22 +59,23 @@ standardized_x = preprocessing.scale(x)
 #create a test set of size of about 20% of the dataset
 x_train,x_test,y_train,y_test = train_test_split(standardized_x,y,test_size=0.2,random_state=42, stratify=y)
 
-nb = GaussianNB()
+model = GaussianNB()
 
-print(nb.get_params())
+f.write('Default parameters %s \n' % str(model.get_params()))
 
-nb.fit(x_train,y_train)
 
-y_pred = nb.predict(x_test)
+model.fit(x_train,y_train)
+
+y_pred = model.predict(x_test)
 y_true = y_test
 
 print('Recall (TRP) %.2f (1 = best 0 = worse)' % recall_score(y_test, y_pred))
-print("Accuracy score: %.2f" % nb.score(x_test,y_test))
+print("Accuracy score: %.2f" % model.score(x_test,y_test))
 
 
 if args.deploy:
-    print("[+]Model ready for deployment")
-    joblib.dump(nb, 'models/nb_model.pkl')
+    print("[+] Model ready for deployment")
+    joblib.dump(model, 'models/nb_model.pkl')
 
 """
 Performance
@@ -110,7 +115,7 @@ print(pd.DataFrame(report).transpose())
 print("True positive rate = Recall")
 
 print("[+] ROC")
-y_pred_proba = nb.predict_proba(x_test)[:,1]
+y_pred_proba = model.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
 
@@ -171,4 +176,6 @@ kfold = KFold(n_splits=10, random_state=42)
 model_kfold = GaussianNB()
 results_kfold = cross_val_score(model_kfold, standardized_x, y, cv=kfold)
 
-print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))
+print("Cross validated: %.2f%%" % (results_kfold.mean()*100.0))
+f.write("Cross validated accuracy score: %.2f \n" % (results_kfold.mean()*100.0))
+f.close()

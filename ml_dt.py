@@ -24,6 +24,11 @@ args = parser.parse_args()
 path = args.path
 deploy = args.deploy
 
+f = open("scores/dt_scores.txt", "w")
+
+"""
+    tuning https://www.geeksforgeeks.org/svm-hyperparameter-tuning-using-gridsearchcv-ml/
+"""
 
 """"
 Pre-process data: drop duplicates and empty
@@ -31,21 +36,20 @@ Pre-process data: drop duplicates and empty
 df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
-df =  shuffle(df).reset_index(drop=True)
-
+df = shuffle(df).reset_index(drop=True)
+f.write('Dataset %s\n' % path)
 """
 Properties of the dataset
 """
-print("[+] Properties of the dataset")
-print('Total llds %d' % df.shape[0])
+data_total = df.shape
+print('Total llds %d' % data_total[0])
+f.write('Total llds %d \n' % data_total[0])
 
 """
 Simple Decison Tree
 """
 print("[+] Applying Simple Decison Tree")
-dt=DecisionTreeClassifier()
-
-print(dt.get_params())
+model = DecisionTreeClassifier()
 #features, labels
 x = df.drop(['label','lld'], axis=1)
 y = df['label']
@@ -57,39 +61,44 @@ standardized_x = preprocessing.scale(x)
 x_train, x_test, y_train, y_test = train_test_split(standardized_x , y, test_size=0.20, random_state=42, stratify=y,shuffle=True)
 
 #train
-dt.fit(x_train,y_train)
-print("Accuracy score: %.2f" % dt.score(x_test,y_test))
-
+model.fit(x_train,y_train)
+print("Untuned accuracy score: %.2f" % model.score(x_test,y_test))
+f.write("Untuned accuracy score: %.2f \n" % model.score(x_test,y_test))
 
 print("[+] Applying DT tuning")
 from sklearn.model_selection import GridSearchCV
 
 # Necessary imports
 from scipy.stats import randint
-from sklearn.model_selection import RandomizedSearchCV
-
-# Creating the hyperparameter grid
-param_dist = {"max_depth": [3, None],
-              "max_features": randint(1, 9),
-              "min_samples_leaf": randint(1, 9),
+# defining parameter range
+param_grid = {"max_depth": [3, None],
+              "max_features": [1,2,3,4],
+              "min_samples_leaf": [1,2,3,4],
               "criterion": ["gini", "entropy"]}
 
-# Instantiating Decision Tree classifier
-tree = DecisionTreeClassifier()
 
-# Instantiating RandomizedSearchCV object
-tree_cv = RandomizedSearchCV(tree, param_dist, cv = 5)
+grid = GridSearchCV(model, param_grid, refit = True)
 
-tree_cv.fit(x, y)
+# fitting the model for grid search
+grid.fit(x, y)
+print(grid.best_params_)
+print(grid.best_estimator_)
+
+grid_predictions = grid.predict(x_test)
 
 # Print the tuned parameters and score
-print("Tuned Decision Tree Parameters: {}".format(tree_cv.best_params_))
-print("Best score is {}".format(tree_cv.best_score_))
+print("Tuned Decision Tree Parameters: {}".format(grid.best_params_))
+print("Best score is {}".format(grid.best_score_))
+
+f.write('Tuned parameters %s \n' % str(grid.get_params()))
+f.write("Tuned accuracy score: %.2f \n" % (grid.best_score_*100.0))
 
 
 if args.deploy:
     print("[+] Model ready for deployment")
-    joblib.dump(dt, 'models/dt_model.pkl')
+    model = DecisionTreeClassifier(**grid.best_params_)
+    model.fit(x_train,y_train)
+    joblib.dump(model, 'models/dt_model.pkl')
 
 """
 Performance
@@ -99,7 +108,7 @@ Performance
 - Precision recall curve
 """
 #evaluating test sets
-y_pred = dt.predict(x_test)
+y_pred = model.predict(x_test)
 y_true = y_test
 
 print("[+]Confusion matrix")
@@ -132,12 +141,12 @@ report = classification_report(y_test, y_pred,target_names=target_names,output_d
 print(pd.DataFrame(report).transpose())
 print("True positive rate = Recall")
 
-y_pred_proba = dt.predict_proba(x_test)[:,1]
+y_pred_proba = model.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
 
 
-print('Accuracy %.2f' % accuracy_score(y_test, y_pred ))
+print('accuracy %.2f' % accuracy_score(y_test, y_pred ))
 
 print('What percent of positive predictions were correct? F-1 %.2f' % f1_score(y_test, y_pred ))
 
@@ -169,7 +178,7 @@ from sklearn.metrics import f1_score,auc
 # split into train/test sets
 trainX, testX, trainy, testy = train_test_split(standardized_x, y, test_size=0.2, random_state=42,shuffle=True)
 # fit a model
-model = DecisionTreeClassifier(**tree_cv.best_params_)
+model = DecisionTreeClassifier(**grid.best_params_)
 model.fit(trainX, trainy)
 # predict probabilities
 lr_probs = model.predict_proba(testX)
@@ -201,7 +210,9 @@ Cross validation k-fold
 from sklearn.model_selection import KFold
 
 kfold = KFold(n_splits=10, random_state=42)
-model_kfold = DecisionTreeClassifier(**tree_cv.best_params_)
+model_kfold = DecisionTreeClassifier(**grid.best_params_)
 results_kfold = cross_val_score(model_kfold, standardized_x, y, cv=kfold)
 
-print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))
+print("Cross validated accuracy: %.2f%%" % (results_kfold.mean()*100.0))
+f.write("Cross validated accuracy: %.2f \n" % (results_kfold.mean()*100.0))
+f.close()

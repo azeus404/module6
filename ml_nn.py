@@ -16,6 +16,7 @@ from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.metrics import classification_report, confusion_matrix,roc_curve,roc_auc_score,recall_score
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import KFold
+from sklearn.utils import shuffle
 
 parser = argparse.ArgumentParser(description='Process lld_labeled')
 parser.add_argument('path', help='path to file with features added to domainlist')
@@ -24,6 +25,7 @@ args = parser.parse_args()
 path = args.path
 deploy = args.deploy
 
+f = open("scores/nn_scores.txt", "w")
 
 """
     Tuning https://www.geeksforgeeks.org/ml-hyperparameter-tuning/
@@ -35,22 +37,24 @@ Pre-process data: drop duplicates
 df = pd.read_csv(path,encoding='utf-8')
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
-
+df = shuffle(df).reset_index(drop=True)
+f.write('Dataset %s\n' % path)
 
 """
 Properties of the dataset
 """
 data_total = df.shape
 print('Total llds %d' % data_total[0])
+f.write('Total llds %d \n' % data_total[0])
 
 """
 Neural network
 """
 print("[+] Applying Neural Network")
 
-mlp = MLPClassifier(hidden_layer_sizes=(8,8,8), activation='relu', solver='adam', max_iter=500)
+model = MLPClassifier()
 
-print(mlp.get_params())
+print(model.get_params())
 
 x = df.drop(['label','lld'],axis=1).values
 y = df['label'].values
@@ -63,27 +67,22 @@ scale = preprocessing.StandardScaler()
 scale.fit(x_train)
 x_train = scale.transform(x_train)
 
-mlp.fit(x_train,y_train)
+model.fit(x_train,y_train)
 
-predict_train = mlp.predict(x_train)
-predict_test = mlp.predict(x_test)
+predict_train = model.predict(x_train)
+predict_test = model.predict(x_test)
 
-y_pred = mlp.predict(x_test)
+y_pred = model.predict(x_test)
 y_true = y_test
 
 print('Recall (TRP) %.2f (1 = best 0 = worse)' % recall_score(y_test, y_pred))
-print("Accuracy score: %.2f" % mlp.score(x_test,y_test))
-
-if args.deploy:
-    print("[+] Model ready for deployment")
-    joblib.dump(mlp, 'models/nn_model.pkl')
+print("Untuned accuracy score: %.2f" % model.score(x_test,y_test))
+f.write("Untuned accuracy score: %.2f \n" % model.score(x_test,y_test))
 
 
 print("[+] Applying neural network tuning")
 from sklearn.model_selection import GridSearchCV
 
-# Instantiating
-nn = MLPClassifier()
 # defining parameter range
 param_grid = {
         'hidden_layer_sizes': [(7, 7), (128,), (128, 7)],
@@ -91,13 +90,13 @@ param_grid = {
         'epsilon': [1e-3, 1e-7, 1e-8, 1e-9, 1e-8]
     }
 
-grid = GridSearchCV(nn, param_grid, refit = True, verbose = 3)
+grid = GridSearchCV(model, param_grid, refit = True)
 
 # fitting the model for grid search
 grid.fit(x_train, y_train)
 print(grid.best_params_)
 print(grid.best_estimator_)
-
+f.write('tunned parameters %s \n' % str(grid.get_params()))
 
 grid_predictions = grid.predict(x_test)
 
@@ -108,6 +107,14 @@ print(classification_report(y_test, grid_predictions))
 print("Tuned NN Parameters: {}".format(grid.best_params_))
 print("Best score is {}".format(grid.best_score_))
 
+f.write('Tuned parameters %s \n' % str(grid.get_params()))
+f.write("Tuned accuracy score: %.2f \n" % (grid.best_score_*100.0))
+
+if args.deploy:
+    print("[+] Model ready for deployment")
+    model = MLPClassifier(**grid.best_params_)
+    model.fit(x_train,y_train)
+    joblib.dump(model, 'models/nn_model.pkl')
 
 
 """
@@ -118,10 +125,10 @@ Performance
 - Precision recall curve
 """
 
-y_pred = mlp.predict(x_test)
+y_pred = model.predict(x_test)
 y_true = y_test
 
-print("[+]Confusion matrix")
+print("[+] Confusion matrix")
 print(pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True))
 
 
@@ -151,7 +158,7 @@ print(pd.DataFrame(report).transpose())
 print("True positive rate = Recall")
 
 print("[+] ROC")
-y_pred_proba = mlp.predict_proba(x_test)[:,1]
+y_pred_proba = model.predict_proba(x_test)[:,1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
 
@@ -210,4 +217,6 @@ kfold = KFold(n_splits=10, random_state=42)
 model_kfold = MLPClassifier(**grid.best_params_)
 results_kfold = cross_val_score(model_kfold, x, y, cv=kfold)
 
-print("Accuracy: %.2f%%" % (results_kfold.mean()*100.0))
+print("Cross validated accuracy: %.2f%%" % (results_kfold.mean()*100.0))
+f.write("Cross validated accuracy: %.2f \n" % (results_kfold.mean()*100.0))
+f.close()
