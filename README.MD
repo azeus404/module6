@@ -1,6 +1,6 @@
 
 # Detecting C2 over DNS using LLDs
-Paper MSCE 2019
+Paper MCSE 2019
 
 We use supervised machine learning algorithms to detect of data exfiltration using DNS protocol.
 This method uses lexical features in lower level domain names (lld) to predict if a domain query is benign or malicious.
